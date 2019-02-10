@@ -1,11 +1,8 @@
 #include "list.h"
+#include <stdio.h>
 
 int main()
 {
-	list_T list1;
-
-	list1.addElement (5);
-	list1.addElement (10);
-	list1.iterate (dumpElement);
+	printf ("Am I supposed to do anything?\n");
 	return 0;
 }

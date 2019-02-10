@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #define PRINT(args...)      \
 	printf(args);           \
-	fflush (stdout);        \
+	fflush (stdout);
 
 typedef int object;
 
@@ -32,6 +33,7 @@ class list_T
 		int       deleteElement  (listElement* deletedElement);
 
 		int iterate (int (*iteratedFunction) (object));
+
 		int dump ();
 		//For dump:
 		// int dump ();

@@ -26,18 +26,27 @@ list_T::list_T ()
 
 list_T::~list_T ()
 {
-	// Will be filled later
+	if (head != NULL)
+	{
+		listElement* currentElement = head;
+		listElement* temp = head;
+		do
+		{
+			temp = currentElement->next;
+			free (currentElement);
+			currentElement = temp;
+		} while (currentElement != 0);
+	}
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
 
-template <class object>
-listElement* slist_T<object>::addElement (object newElementVal)
+listElement* list_T::addElement (object newElementVal)
 {
 	// printf ("I have started adding an element\n");
 	assert (nElements >= 0);
 
-	listElement* addedElement = fakeCalloc (1, sizeof(*addedElement));
+	listElement* addedElement = static_cast <listElement*> (fakeCalloc (1, sizeof(*addedElement)));
 	if (addedElement == 0)
 	{
 		PRINT ("Error with allocating memory")
@@ -62,7 +71,7 @@ listElement* slist_T<object>::addElement (object newElementVal)
 
 			return addedElement;
 		}
-		else if ((nElements > 0) && (nElements < maxElements))
+		else if (nElements > 0)
 		{
 			//printf ("case 0 < nElements < max\n")
 
@@ -73,7 +82,9 @@ listElement* slist_T<object>::addElement (object newElementVal)
 			addedElement->next = head;
 
 			head = addedElement;
-			addedElement->prev = NULL
+			addedElement->prev = NULL;
+
+			addedElement->content = newElementVal;
 
 			nElements++;
 
@@ -91,7 +102,7 @@ listElement* slist_T<object>::addElement (object newElementVal)
 
 //-----------------------------------------------------------------------------------------------------------------
 
-int list_T::deleteElement (object* deletedElement)
+int list_T::deleteElement  (listElement* deletedElement)
 {
 	// printf ("I have started deleting a certain object from a list\n");
 	assert (deletedElement);
@@ -133,7 +144,7 @@ int list_T::deleteElement (object* deletedElement)
 
 //----------------------------------------------------------------------------------------------------------------------------------------
 
-int iterate (int (*iteratedFunction) (object));
+int list_T::iterate (int (*iteratedFunction) (object))
 {
 	if (head != NULL)
 	{
@@ -141,155 +152,46 @@ int iterate (int (*iteratedFunction) (object));
 		do
 		{
 			iteratedFunction (currentElement->content);
-		} while (currentElement->next != 0)
+			currentElement = currentElement->next;
+		} while (currentElement != 0);
 	}
 
 	return 0;
 }
 
 //--------------------------------------------------------------------------------------------------------------
+
 int dumpElement (object num)
 {
-	return printf ("%d\n");
+	return printf ("%d\n", num);
 }
-
 
 //----------------------------------------------------------------------------------------------------------------------------------------
-//
-// template <class object>
-// int list_T<object>::dump()
-// {
-// 	printf ("maxElements = %d, nElements = %d\n", maxElements, nElements);
-// 	printf ("calculatednElements = %d\n", this->calculateNElements());
-// 	printf ("head =     %p\n", head);
-// 	printf ("tail =     %p\n", tail);
-// 	printf ("freeHead = %p\n", freeHead);
-// 	printf ("freeTail = %p\n", freeTail);
-// 	if (freeTail != NULL)
-// 		printf ("freeTail->next = %p\n", freeTail->next);
-// 	//printf ("//------------------------------------------//\n");
-// 	//printf ("")
-//
-// 	return 0;
-// }
-//
-// //-------------------------------------------------------------------------------------------------------------------------------
-//
-// template <class object>
-// int list_T<object>::calculateNElements ()
-// {
-// 	int nElems = 0;
-// 	object* checkedElement = head;
-//
-// 	if (head != NULL)
-// 	{
-// 		while (checkedElement != NULL)
-// 		{
-// 			nElems++;
-// 			checkedElement = checkedElement->next;
-// 		}
-// 	}
-// 	printf ("ActivatedElements = %d\n", nElems);
-//
-// 	int nFreeElems = 0;
-// 	if (freeHead != NULL)
-// 	{
-// 		checkedElement = freeHead;
-// 		while (checkedElement != NULL)
-// 		{
-// 			nElems++;
-// 			nFreeElems++;
-// 			checkedElement = checkedElement->next;
-// 		}
-// 	}
-// 	printf ("FreeElements = %d\n", nFreeElems);
-// 	return nElems;
-// }
-//
-// //---------------------------------------------------------------------------------------------------
-//
-// template <class object>
-// int list_T<object>::dumpAllElements()
-// {
-// 	printf ("ACTIVE ELEMENTS:\n");
-//
-// 	object* dumpedElement = head;
-// 	while (dumpedElement != NULL)
-// 	{
-// 		printf ("prev = %p\n", dumpedElement->prev);
-// 		printf ("this = %p\n", dumpedElement);
-// 		printf ("next = %p\n\n", dumpedElement->next);
-// 		dumpedElement = dumpedElement->next;
-// 	}
-// 	printf ("FREE ELEMENTS:\n");
-// 	dumpedElement = freeHead;
-//
-// 	while (dumpedElement != NULL)
-// 	{
-// 		printf ("prev = %p\n", dumpedElement->prev);
-// 		printf ("this = %p\n", dumpedElement);
-// 		printf ("next = %p\n\n", dumpedElement->next);
-// 		dumpedElement = dumpedElement->next;
-// 	}
-// 	printf ("================================================================\n");
-// 	return 0;
-// }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-template<>
-int list_T<zombie>::printfSmth ()
+int list_T::dump ()
 {
-	printf ("cheeeeeeee!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n");
+	printf ("=====DUMP=====\n");
+	printf ("nElements = %d\n", nElements);
+	printf ("head = %p\n", head);
+	printf ("tail = %p\n\n", tail);
+	printf ("--------------\n\n");
+
+	if (head != NULL)
+	{
+		listElement* currentElement = head;
+		do
+		{
+			printf ("this = %p\n", currentElement);
+			printf ("val  = %d\n", currentElement->content);
+			printf ("prev = %p\n", currentElement->prev);
+			printf ("next = %p\n", currentElement->next);
+			printf ("\n");
+			currentElement = currentElement->next;
+		} while (currentElement != 0);
+	}
+
+	printf ("==============\n");
 	return 0;
 }
-*/
+
+//----------------------------------------------------------------------------------------------------------------------------------------
