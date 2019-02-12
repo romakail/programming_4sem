@@ -1,3 +1,6 @@
+#ifndef LIST_H_INCLUDED
+#define LIST_H_INCLUDED
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -8,7 +11,14 @@
 
 typedef int object;
 
-static const float FAIL_PROBABILITY = 0;
+#ifdef TEST
+#	include "fakeCalloc.h"
+#	define calloc(args...) fakeCalloc(args)
+#endif
+
+// extern float FAIL_PROBABILITY;
+const int SUCCESS = 0;
+const int FAIL = 1;
 
 struct listElement
 {
@@ -20,7 +30,7 @@ struct listElement
 class list_T
 {
 	private:
-		int nElements;
+		unsigned int nElements;
 
 		listElement* head;
 		listElement* tail;
@@ -29,10 +39,16 @@ class list_T
 		//Fundamental functions
 		list_T  ();
 		~list_T ();
-		listElement* addElement  (object      newElement);
-		int       deleteElement  (listElement* deletedElement);
-
+		listElement* addElementToHead (object      newElement);
+		listElement* addElementToTail (object      newElement);
+		listElement* findElement      (object desiredValue);
+		int          deleteElement    (listElement* deletedElement);
+		int          elementsNumber ();
 		int iterate (int (*iteratedFunction) (object));
+
+		int verification ();
+		int checkCycle   ();
+		int countElements();
 
 		int dump ();
 		//For dump:
@@ -43,3 +59,5 @@ class list_T
 
 void* fakeCalloc (size_t nmemb, size_t size);
 int dumpElement (object num);
+
+#endif // LIST_H

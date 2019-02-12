@@ -1,0 +1,338 @@
+        -:    0:Source:list.cpp
+        -:    0:Graph:listTest.gcno
+        -:    0:Data:listTest.gcda
+        -:    0:Runs:6
+        -:    0:Programs:1
+        -:    1:#include "list.h"
+        -:    2:
+       28:    3:list_T::list_T ()
+        -:    4:{
+       28:    5:	nElements = 0;
+        -:    6:
+       28:    7:	head = NULL;
+       28:    8:	tail = NULL;
+       28:    9:}
+        -:   10:
+        -:   11://----------------------------------------------------------------------------------------------------------------------------------
+        -:   12:
+       56:   13:list_T::~list_T ()
+        -:   14:{
+        -:   15:
+       28:   16:	listElement* currentElement = head;
+       28:   17:	listElement* temp = 0;
+      200:   18:	while (currentElement != NULL)
+        -:   19:	{
+       86:   20:		temp = currentElement->next;
+       86:   21:		free (currentElement);
+       86:   22:		currentElement = temp;
+        -:   23:	}
+       28:   24:}
+        -:   25:
+        -:   26://---------------------------------------------------------------------------------------------------------------------------------
+        -:   27:
+       24:   28:listElement* list_T::addElementToHead (object newElementVal)
+        -:   29:{
+        -:   30:	// printf ("I have started adding an element\n");
+        -:   31:	assert (nElements >= 0);
+        -:   32:
+       24:   33:	listElement* addedElement = static_cast <listElement*> (calloc (1, sizeof(*addedElement)));
+       24:   34:	if (addedElement == 0)
+        -:   35:	{
+        -:   36:		// printf ("Error with allocating memory")
+        6:   37:		return 0;
+        -:   38:	}
+        -:   39:	else
+        -:   40:	{
+       18:   41:		if (nElements == 0)
+        -:   42:		{
+        -:   43:			//printf ("case nElements == 0\n");
+       12:   44:			assert (head == NULL);
+       12:   45:			assert (tail == NULL);
+        -:   46:
+       12:   47:			head = addedElement;
+       12:   48:			tail = addedElement;
+        -:   49:
+       12:   50:			addedElement->next = NULL;
+       12:   51:			addedElement->prev = NULL;
+       12:   52:			addedElement->content = newElementVal;
+        -:   53:
+       12:   54:			nElements++;
+        -:   55:
+       12:   56:			return addedElement;
+        -:   57:		}
+        6:   58:		else if (nElements > 0)
+        -:   59:		{
+        -:   60:			//printf ("case 0 < nElements < max\n")
+        -:   61:
+        6:   62:			assert (head != NULL);
+        6:   63:			assert (tail != NULL);
+        -:   64:
+        6:   65:			head->prev = addedElement;
+        6:   66:			addedElement->next = head;
+        -:   67:
+        6:   68:			head = addedElement;
+        6:   69:			addedElement->prev = NULL;
+        -:   70:
+        6:   71:			addedElement->content = newElementVal;
+        -:   72:
+        6:   73:			nElements++;
+        -:   74:
+        6:   75:			return addedElement;
+        -:   76:		}
+        -:   77:		else
+        -:   78:		{
+    #####:   79:			printf ("something went wrong line = %d\n", __LINE__);
+    #####:   80:			exit (0);
+        -:   81:		}
+        -:   82:	}
+        -:   83:
+        -:   84:	return NULL;
+        -:   85:}
+        -:   86:
+        -:   87://---------------------------------------------------------------------------------------------------------------------------------
+        -:   88:
+      104:   89:listElement* list_T::addElementToTail (object newElementVal)
+        -:   90:{
+        -:   91:	// printf ("I have started adding an element\n");
+        -:   92:	assert (nElements >= 0);
+        -:   93:
+      104:   94:	listElement* addedElement = static_cast <listElement*> (calloc (1, sizeof(*addedElement)));
+      104:   95:	if (addedElement == 0)
+        -:   96:	{
+        -:   97:		// printf ("Error with allocating memory")
+        6:   98:		return 0;
+        -:   99:	}
+        -:  100:	else
+        -:  101:	{
+       98:  102:		if (nElements == 0)
+        -:  103:		{
+        -:  104:			//printf ("case nElements == 0\n");
+       16:  105:			assert (head == NULL);
+       16:  106:			assert (tail == NULL);
+        -:  107:
+       16:  108:			head = addedElement;
+       16:  109:			tail = addedElement;
+        -:  110:
+       16:  111:			addedElement->next = NULL;
+       16:  112:			addedElement->prev = NULL;
+       16:  113:			addedElement->content = newElementVal;
+        -:  114:
+       16:  115:			nElements++;
+        -:  116:
+       16:  117:			return addedElement;
+        -:  118:		}
+       82:  119:		else if (nElements > 0)
+        -:  120:		{
+        -:  121:			//printf ("case 0 < nElements < max\n")
+        -:  122:
+       82:  123:			assert (head != NULL);
+       82:  124:			assert (tail != NULL);
+        -:  125:
+       82:  126:			tail->next = addedElement;
+       82:  127:			addedElement->prev = tail;
+        -:  128:
+       82:  129:			tail = addedElement;
+       82:  130:			addedElement->next = NULL;
+        -:  131:
+       82:  132:			addedElement->content = newElementVal;
+        -:  133:
+       82:  134:			nElements++;
+        -:  135:
+       82:  136:			return addedElement;
+        -:  137:		}
+        -:  138:		else
+        -:  139:		{
+    #####:  140:			printf ("something went wrong line = %d\n", __LINE__);
+    #####:  141:			exit (0);
+        -:  142:		}
+        -:  143:	}
+        -:  144:
+        -:  145:	return NULL;
+        -:  146:}
+        -:  147:
+        -:  148://-----------------------------------------------------------------------------------------------------------------
+        -:  149:
+       30:  150:int list_T::deleteElement  (listElement* deletedElement)
+        -:  151:{
+        -:  152:	// printf ("I have started deleting a certain object from a list\n");
+       30:  153:	assert (deletedElement);
+        -:  154:	// printf ("nElements = %d\n", nElements);
+        -:  155:	//assert (nElements > 0);
+        -:  156:	// printf ("Deleting %p\n", deletedElement);
+        -:  157:
+       30:  158:	if      ((deletedElement->next != NULL) && (deletedElement->prev != NULL))
+        -:  159:	{
+        6:  160:		deletedElement->prev->next = deletedElement->next;
+        6:  161:		deletedElement->next->prev = deletedElement->prev;
+        -:  162:	}
+       24:  163:	else if ((deletedElement->next == NULL) && (deletedElement->prev != NULL))
+        -:  164:	{
+       12:  165:		deletedElement->prev->next = NULL;
+       12:  166:		tail = deletedElement->prev;
+        -:  167:	}
+       12:  168:	else if ((deletedElement->next != NULL) && (deletedElement->prev == NULL))
+        -:  169:	{
+        6:  170:		deletedElement->next->prev = NULL;
+        6:  171:		head = deletedElement->next;
+        -:  172:	}
+        6:  173:	else if ((deletedElement->next == NULL) && (deletedElement->prev == NULL))
+        -:  174:	{
+        6:  175:		head = deletedElement->next;
+        6:  176:		tail = deletedElement->prev;
+        -:  177:	}
+        -:  178:	// else
+        -:  179:	// {
+        -:  180:	// 	printf ("What might have happened  line = %d\n", __LINE__);
+        -:  181:	// 	assert (0);
+        -:  182:	// }
+        -:  183:
+       30:  184:	free (deletedElement);
+       30:  185:	nElements--;
+        -:  186:
+        -:  187:	// printf ("in the end of delete nElements = %d\n", nElements);
+        -:  188:	// printf ("I have finished deleting a cerain object\n");
+       30:  189:	return 0;
+        -:  190:}
+        -:  191:
+        -:  192://----------------------------------------------------------------------------------------------------------------------------------------
+        -:  193:
+       36:  194:listElement* list_T::findElement (object desiredValue)
+        -:  195:{
+       36:  196:	listElement* currentElement = head;
+      288:  197:	while (currentElement != NULL)
+        -:  198:	{
+      144:  199:		if (currentElement->content == desiredValue)
+        -:  200:		{
+       18:  201:			return currentElement;
+        -:  202:		}
+      126:  203:		currentElement = currentElement->next;
+        -:  204:	}
+       18:  205:	return 0;
+        -:  206:}
+        -:  207:
+        -:  208://------------------------------------------------------------------------------
+        -:  209:
+       48:  210:int list_T::elementsNumber ()
+        -:  211:{
+       48:  212:	return nElements;
+        -:  213:}
+        -:  214:
+        -:  215://----------------------------------------------------------------------------------------------------------------------------------------
+        -:  216:
+        4:  217:int list_T::iterate (int (*iteratedFunction) (object))
+        -:  218:{
+        4:  219:	listElement* currentElement = head;
+       44:  220:	while (currentElement != NULL)
+        -:  221:	{
+       20:  222:		iteratedFunction (currentElement->content);
+       20:  223:		currentElement = currentElement->next;
+        -:  224:	}
+        4:  225:	return 0;
+        -:  226:}
+        -:  227:
+        -:  228://--------------------------------------------------------------------------------------------------------------
+        -:  229:
+    #####:  230:int dumpElement (object num)
+        -:  231:{
+    #####:  232:	return printf ("%d\n", num);
+        -:  233:}
+        -:  234:
+        -:  235://----------------------------------------------------------------------------------------------------------------------------------------
+        -:  236:
+    #####:  237:int list_T::dump ()
+        -:  238:{
+    #####:  239:	printf ("=====DUMP=====\n");
+    #####:  240:	printf ("nElements = %d\n", nElements);
+    #####:  241:	printf ("head = %p\n", head);
+    #####:  242:	printf ("tail = %p\n\n", tail);
+    #####:  243:	printf ("--------------\n\n");
+        -:  244:
+    #####:  245:	listElement* currentElement = head;
+    #####:  246:	while (currentElement != NULL)
+        -:  247:	{
+    #####:  248:		printf ("this = %p\n", currentElement);
+    #####:  249:		printf ("val  = %d\n", currentElement->content);
+    #####:  250:		printf ("prev = %p\n", currentElement->prev);
+    #####:  251:		printf ("next = %p\n", currentElement->next);
+    #####:  252:		printf ("\n");
+    #####:  253:		currentElement = currentElement->next;
+        -:  254:	}
+        -:  255:
+    #####:  256:	printf ("==============\n");
+    #####:  257:	return 0;
+        -:  258:}
+        -:  259:
+        -:  260://----------------------------------------------------------------------------------------------------------------------------------------
+        -:  261:
+       36:  262:int list_T::verification ()
+        -:  263:{
+       36:  264:	if (this->checkCycle() != 0)
+    #####:  265:		return FAIL;
+       36:  266:	if (nElements != this->countElements())
+    #####:  267:		return FAIL;
+       36:  268:	return SUCCESS;
+        -:  269:}
+        -:  270:
+        -:  271://----------------------------------------------------------------------------------------------------------------------------------------
+        -:  272:
+       36:  273:int list_T::checkCycle ()
+        -:  274:{
+       36:  275:	listElement* ptr1 = head;
+       36:  276:	listElement* ptr2 = head;
+       36:  277:	int fail = 0;
+        -:  278:
+      108:  279:	while (fail == 0)
+        -:  280:	{
+       72:  281:		if (ptr2 == NULL)
+       18:  282:			break;
+        -:  283:		else
+       54:  284:			ptr2 = ptr2->next;
+        -:  285:
+       54:  286:		if (ptr2 == NULL)
+       18:  287:			break;
+        -:  288:		else
+       36:  289:			ptr2 = ptr2->next;
+        -:  290:
+       36:  291:		if (ptr1 != NULL)
+       36:  292:			ptr1 = ptr1->next;
+        -:  293:
+       36:  294:		if (ptr1 == ptr2)
+    #####:  295:			fail = 1;
+        -:  296:	}
+       36:  297:	return fail;
+        -:  298:}
+        -:  299:
+        -:  300://----------------------------------------------------------------------------------------------------------------------------------------
+        -:  301:
+       36:  302:int list_T::countElements ()
+        -:  303:{
+       36:  304:	listElement* currentElement = head;
+       36:  305:	int counter = 0;
+      216:  306:	while (currentElement != NULL)
+        -:  307:	{
+       90:  308:		counter++;
+       90:  309:		currentElement = currentElement->next;
+        -:  310:	}
+       36:  311:	return counter;
+        -:  312:}
+        -:  313:
+        -:  314:
+        -:  315:
+        -:  316:
+        -:  317:
+        -:  318:
+        -:  319:
+        -:  320:
+        -:  321:
+        -:  322:
+        -:  323:
+        -:  324:
+        -:  325:
+        -:  326:
+        -:  327:
+        -:  328:
+        -:  329:
+        -:  330:
+        -:  331:
+        -:  332:
+        -:  333://

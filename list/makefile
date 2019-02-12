@@ -21,8 +21,8 @@ clear:
 	rm -rf *.o *.d *.gcno prog *.gcov *.gcda
 
 #===========Testing stuff==================
-test: mainTest.o listTest.o
-	g++ -o prog mainTest.o listTest.o -lgcov
+test: mainTest.o listTest.o fakeCalloc.o
+	g++ -o prog mainTest.o listTest.o fakeCalloc.o -lgcov
 	./prog
 	gcov listTest.gcda
 	gedit list.cpp.gcov
@@ -31,7 +31,10 @@ mainTest.o: test.cpp
 	g++ test.cpp -c -o mainTest.o
 
 listTest.o: list.cpp
-	g++ list.cpp -c -o listTest.o -ftest-coverage -fprofile-arcs -g
+	g++ list.cpp -c -o listTest.o -ftest-coverage -fprofile-arcs -g -DTEST
+
+fakeCalloc.o: fakeCalloc.cpp
+	g++ fakeCalloc.cpp -c -o fakeCalloc.o
 
 #==========================================
 
