@@ -1,0 +1,23 @@
+=====DUMP=====
+nElements = 3
+head = 0x5b7eae0
+tail = 0x5b7eba0
+
+--------------
+
+this = 0x5b7eae0
+val  = 1
+prev = (nil)
+next = 0x5b7eb40
+
+this = 0x5b7eb40
+val  = 2
+prev = 0x5b7eae0
+next = 0x5b7eba0
+
+this = 0x5b7eba0
+val  = 3
+prev = 0x5b7eb40
+next = (nil)
+
+==============

@@ -1,3 +1,8 @@
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
 
 #include "list.h"
 #include "fakeCalloc.h"
@@ -23,6 +28,10 @@ int testAllocateProblem ();
 int testSearch ();
 int testIterateFunc (object elemContent);
 int testIterate ();
+int testCycle ();
+int testElementsCounter ();
+// int testDump ();
+
 
 int main()
 {
@@ -45,6 +54,9 @@ int testList ()
 	TEST (testAllocateProblem ());
 	TEST (testSearch ());
 	TEST (testIterate ());
+	TEST (testCycle ());
+	TEST (testElementsCounter());
+	// TEST (testDump ());
 
 	printf ("=========================\n");
 	return 0;
@@ -207,11 +219,11 @@ int testIterate ()
 	FAIL_PROBABILITY = 0;
 	list_T list;
 
+	listElement* elem5 = list.addElementToTail(5);
 	listElement* elem1 = list.addElementToTail(1);
 	listElement* elem2 = list.addElementToTail(2);
 	listElement* elem3 = list.addElementToTail(3);
 	listElement* elem4 = list.addElementToTail(4);
-	listElement* elem5 = list.addElementToTail(5);
 
 	list.iterate (testIterateFunc);
 
@@ -221,6 +233,147 @@ int testIterate ()
 	return SUCCESS;
 }
 
+//------------------------------------------------------------------------------
+
+int testCycle ()
+{
+	FAIL_PROBABILITY = 0;
+	list_T list;
+
+	listElement* elem1 = list.addElementToTail(1);
+	listElement* elem2 = list.addElementToTail(2);
+	listElement* elem3 = list.addElementToTail(3);
+
+	elem3->next = elem1;
+	// list.dump ();
+
+	if (list.verification() != CYCLE)
+	{
+		elem3->next = NULL;
+		return FAIL;
+	}
+	elem3->next = NULL;
+	return SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+int testElementsCounter ()
+{
+	list_T list;
+
+	listElement* elem1 = list.addElementToTail(1);
+	listElement* elem2 = list.addElementToTail(2);
+	listElement* elem3 = list.addElementToTail(3);
+
+	if (list.countElements() != 3)
+		return FAIL;
+
+	listElement* temp = elem2->next;
+	elem2->next = NULL;
+	if (list.verification() != WRONG_N_ELEMENTS)
+	{
+		elem2->next = temp;
+		return FAIL;
+	}
+
+	elem2->next = temp;
+
+	return SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+// int testDump ()
+// {
+// 	int fd = open ("TestDumpOutput", O_RDWR);
+// 	if (fd == -1)
+// 	{
+// 		perror ("\nSomething wrong with open\n");
+// 		return FAIL;
+// 	}
+// 	// if (chmod("TestDumpOutput", 00444) == -1)
+// 	// {
+// 	// 	perror ("chmod fails\n");
+// 	// 	return FAIL;
+// 	// }
+//
+// 	list_T list;
+//
+// 	listElement* elem1 = list.addElementToTail(1);
+// 	listElement* elem2 = list.addElementToTail(2);
+// 	listElement* elem3 = list.addElementToTail(3);
+//
+// 	list.dump (fd);
+//
+// 	if (close (fd) == -1)
+// 	{
+// 		perror ("close fails\n");
+// 		return FAIL;
+// 	}
+//
+// 	int fd1 = open ("TestDumpOutput", O_RDONLY);
+// 	if (fd1 == -1)
+// 	{
+// 		perror ("\nSomething wrong with open TestDumpOutput\n");
+// 		return FAIL;
+// 	}
+//
+// 	int fd2 = open ("testDumpTemplate", O_RDONLY);
+// 	if (fd2 == -1)
+// 	{
+// 		perror ("\nSomething wrong with open testDumpTemplate\n");
+// 		return FAIL;
+// 	}
+//
+// 	printf ("====1====\n");
+// 	struct stat sb1;
+// 	struct stat sb2;
+//
+// 	if (fstat(fd1, &sb1) == -1)
+// 	{
+// 		perror("stat");
+// 		return FAIL;
+// 	}
+// 	if (fstat(fd2, &sb2) == -1)
+// 	{
+// 		perror("stat");
+// 		return FAIL;
+// 	}
+//
+// 	if (sb1.st_size != sb2.st_size)
+// 	{
+// 		printf ("====2====\n");
+// 		return FAIL;
+// 	}
+// 	else
+// 	{
+// 		printf ("====3====\n");
+// 		char* fileContent1 = static_cast <char*> (calloc (sb1.st_size, sizeof(*fileContent1)));
+// 		char* fileContent2 = static_cast <char*> (calloc (sb2.st_size, sizeof(*fileContent2)));
+//
+// 		printf ("====4====\n");
+// 		if (read (fd1, fileContent1, sb1.st_size) != sb1.st_size)
+// 		{
+// 			perror ("write");
+// 			return FAIL;
+// 		}
+// 		if (read (fd2, fileContent2, sb2.st_size) != sb2.st_size)
+// 		{
+// 			perror ("write");
+// 			return FAIL;
+// 		}
+//
+// 		printf ("====5====\n");
+// 		if (memcmp (fileContent1, fileContent2, sb1.st_size) != 0)
+// 		{
+// 			return FAIL;
+// 		}
+// 	}
+//
+//
+// 	return SUCCESS;
+// }
 
 
 

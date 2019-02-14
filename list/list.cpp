@@ -29,6 +29,8 @@ listElement* list_T::addElementToHead (object newElementVal)
 {
 	// printf ("I have started adding an element\n");
 	assert (nElements >= 0);
+	if (nElements == 0xffffffff /* UINT_MAX */)
+		return NULL;
 
 	listElement* addedElement = static_cast <listElement*> (calloc (1, sizeof(*addedElement)));
 	if (addedElement == 0)
@@ -55,7 +57,7 @@ listElement* list_T::addElementToHead (object newElementVal)
 
 			return addedElement;
 		}
-		else if (nElements > 0)
+		else // if (nElements > 0)
 		{
 			//printf ("case 0 < nElements < max\n")
 
@@ -74,14 +76,9 @@ listElement* list_T::addElementToHead (object newElementVal)
 
 			return addedElement;
 		}
-		else
-		{
-			printf ("something went wrong line = %d\n", __LINE__);
-			exit (0);
-		}
 	}
 
-	return NULL;
+	// return NULL;
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------
@@ -90,6 +87,8 @@ listElement* list_T::addElementToTail (object newElementVal)
 {
 	// printf ("I have started adding an element\n");
 	assert (nElements >= 0);
+	if (nElements == 0xffffffff /* UINT_MAX */)
+		return NULL;
 
 	listElement* addedElement = static_cast <listElement*> (calloc (1, sizeof(*addedElement)));
 	if (addedElement == 0)
@@ -116,7 +115,7 @@ listElement* list_T::addElementToTail (object newElementVal)
 
 			return addedElement;
 		}
-		else if (nElements > 0)
+		else // if (nElements > 0)
 		{
 			//printf ("case 0 < nElements < max\n")
 
@@ -135,14 +134,9 @@ listElement* list_T::addElementToTail (object newElementVal)
 
 			return addedElement;
 		}
-		else
-		{
-			printf ("something went wrong line = %d\n", __LINE__);
-			exit (0);
-		}
 	}
 
-	return NULL;
+	// return NULL;
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -227,44 +221,44 @@ int list_T::iterate (int (*iteratedFunction) (object))
 
 //--------------------------------------------------------------------------------------------------------------
 
-int dumpElement (object num)
-{
-	return printf ("%d\n", num);
-}
+// int dumpElement (object num)
+// {
+// 	return printf ("%d\n", num);
+// }
 
 //----------------------------------------------------------------------------------------------------------------------------------------
 
-int list_T::dump ()
-{
-	printf ("=====DUMP=====\n");
-	printf ("nElements = %d\n", nElements);
-	printf ("head = %p\n", head);
-	printf ("tail = %p\n\n", tail);
-	printf ("--------------\n\n");
-
-	listElement* currentElement = head;
-	while (currentElement != NULL)
-	{
-		printf ("this = %p\n", currentElement);
-		printf ("val  = %d\n", currentElement->content);
-		printf ("prev = %p\n", currentElement->prev);
-		printf ("next = %p\n", currentElement->next);
-		printf ("\n");
-		currentElement = currentElement->next;
-	}
-
-	printf ("==============\n");
-	return 0;
-}
+// int list_T::dump (int outputFd)
+// {
+// 	dprintf (outputFd, "=====DUMP=====\n");
+// 	dprintf (outputFd, "nElements = %d\n", nElements);
+// 	dprintf (outputFd, "head = %p\n", head);
+// 	dprintf (outputFd, "tail = %p\n\n", tail);
+// 	dprintf (outputFd, "--------------\n\n");
+//
+// 	listElement* currentElement = head;
+// 	while (currentElement != NULL)
+// 	{
+// 		dprintf (outputFd, "this = %p\n", currentElement);
+// 		dprintf (outputFd, "val  = %d\n", currentElement->content);
+// 		dprintf (outputFd, "prev = %p\n", currentElement->prev);
+// 		dprintf (outputFd, "next = %p\n", currentElement->next);
+// 		dprintf (outputFd, "\n");
+// 		currentElement = currentElement->next;
+// 	}
+//
+// 	dprintf (outputFd, "==============\n");
+// 	return 0;
+// }
 
 //----------------------------------------------------------------------------------------------------------------------------------------
 
 int list_T::verification ()
 {
 	if (this->checkCycle() != 0)
-		return FAIL;
+		return CYCLE;
 	if (nElements != this->countElements())
-		return FAIL;
+		return WRONG_N_ELEMENTS;
 	return SUCCESS;
 }
 

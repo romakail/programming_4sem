@@ -23,9 +23,10 @@ clear:
 #===========Testing stuff==================
 test: mainTest.o listTest.o fakeCalloc.o
 	g++ -o prog mainTest.o listTest.o fakeCalloc.o -lgcov
-	./prog
+	valgrind --leak-check=yes ./prog
 	gcov listTest.gcda
 	gedit list.cpp.gcov
+	# rm TestDumpOutput
 
 mainTest.o: test.cpp
 	g++ test.cpp -c -o mainTest.o

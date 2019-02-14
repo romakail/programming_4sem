@@ -20,6 +20,13 @@ typedef int object;
 const int SUCCESS = 0;
 const int FAIL = 1;
 
+enum ERROR_CODE
+{
+	NORM,
+	CYCLE,
+	WRONG_N_ELEMENTS,
+};
+
 struct listElement
 {
 	listElement* next;
@@ -50,14 +57,9 @@ class list_T
 		int checkCycle   ();
 		int countElements();
 
-		int dump ();
-		//For dump:
-		// int dump ();
-		// int dumpAllElements();
-		// int calculateNElements();
+		// int dump (int outputFd);
 };
 
 void* fakeCalloc (size_t nmemb, size_t size);
-int dumpElement (object num);
 
 #endif // LIST_H
