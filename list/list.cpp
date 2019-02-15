@@ -143,11 +143,7 @@ listElement* list_T::addElementToTail (object newElementVal)
 
 int list_T::deleteElement  (listElement* deletedElement)
 {
-	// printf ("I have started deleting a certain object from a list\n");
 	assert (deletedElement);
-	// printf ("nElements = %d\n", nElements);
-	//assert (nElements > 0);
-	// printf ("Deleting %p\n", deletedElement);
 
 	if      ((deletedElement->next != NULL) && (deletedElement->prev != NULL))
 	{
@@ -169,35 +165,69 @@ int list_T::deleteElement  (listElement* deletedElement)
 		head = deletedElement->next;
 		tail = deletedElement->prev;
 	}
-	// else
-	// {
-	// 	printf ("What might have happened  line = %d\n", __LINE__);
-	// 	assert (0);
-	// }
 
 	free (deletedElement);
 	nElements--;
 
-	// printf ("in the end of delete nElements = %d\n", nElements);
-	// printf ("I have finished deleting a cerain object\n");
 	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------
+
+int list_T::iterate (void* (*iteratedFunction) (listElement*, void*), void* callBackParams)
+{
+	listElement* currentElement = head;
+	while (currentElement != NULL)
+	{
+		iteratedFunction (currentElement, callBackParams);
+		currentElement = currentElement->next;
+	}
+	return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------
+
+void* searchingCallback (listElement* currentElement, void* desiredValuePtr)
+{
+	static listElement* desiredElemPtr = 0;
+
+	if (currentElement != NULL)
+	{
+		if (currentElement->content == * (int*)desiredValuePtr)
+		desiredElemPtr = currentElement;
+		return desiredElemPtr;
+	}
+	else
+	{
+		listElement* temp = desiredElemPtr;
+		desiredElemPtr = NULL;
+		return temp;
+	}
 }
 
 //----------------------------------------------------------------------------------------------------------------------------------------
 
 listElement* list_T::findElement (object desiredValue)
 {
-	listElement* currentElement = head;
-	while (currentElement != NULL)
-	{
-		if (currentElement->content == desiredValue)
-		{
-			return currentElement;
-		}
-		currentElement = currentElement->next;
-	}
-	return 0;
+	this->iterate(searchingCallback, &desiredValue);
+	return (listElement*) searchingCallback (0, 0);
 }
+
+//----------------------------------------------------------------------------------------------------------------------------------------
+
+// listElement* list_T::findElement (object desiredValue)
+// {
+// 	listElement* currentElement = head;
+// 	while (currentElement != NULL)
+// 	{
+// 		if (currentElement->content == desiredValue)
+// 		{
+// 			return currentElement;
+// 		}
+// 		currentElement = currentElement->next;
+// 	}
+// 	return 0;
+// }
 
 //------------------------------------------------------------------------------
 
@@ -205,26 +235,6 @@ int list_T::elementsNumber ()
 {
 	return nElements;
 }
-
-//----------------------------------------------------------------------------------------------------------------------------------------
-
-int list_T::iterate (int (*iteratedFunction) (object))
-{
-	listElement* currentElement = head;
-	while (currentElement != NULL)
-	{
-		iteratedFunction (currentElement->content);
-		currentElement = currentElement->next;
-	}
-	return 0;
-}
-
-//--------------------------------------------------------------------------------------------------------------
-
-// int dumpElement (object num)
-// {
-// 	return printf ("%d\n", num);
-// }
 
 //----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -293,18 +303,34 @@ int list_T::checkCycle ()
 
 //----------------------------------------------------------------------------------------------------------------------------------------
 
-int list_T::countElements ()
+// int list_T::countElements ()
+// {
+// 	listElement* currentElement = head;
+// 	int counter = 0;
+// 	while (currentElement != NULL)
+// 	{
+// 		counter++;
+// 		currentElement = currentElement->next;
+// 	}
+// 	return counter;
+// }
+
+//----------------------------------------------------------------------------------------------------------------------------------------
+
+void* counterCallback (listElement* currentElement, void* nElementsPtr)
 {
-	listElement* currentElement = head;
-	int counter = 0;
-	while (currentElement != NULL)
-	{
-		counter++;
-		currentElement = currentElement->next;
-	}
-	return counter;
+	* (int*) nElementsPtr += 1;
+	return 0;
 }
 
+//----------------------------------------------------------------------------------------------------------------------------------------
+
+int list_T::countElements ()
+{
+	int nElements = 0;
+	this->iterate(counterCallback, &nElements);
+	return nElements;
+}
 
 
 

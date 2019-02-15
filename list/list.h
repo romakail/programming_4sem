@@ -5,10 +5,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#define PRINT(args...)      \
-	printf(args);           \
-	fflush (stdout);
-
 typedef int object;
 
 #ifdef TEST
@@ -51,7 +47,8 @@ class list_T
 		listElement* findElement      (object desiredValue);
 		int          deleteElement    (listElement* deletedElement);
 		int          elementsNumber ();
-		int iterate (int (*iteratedFunction) (object));
+		int iterate (void* (*iteratedFunction) (listElement*, void*), void* callBackParams);
+		// int iterate (int (*iteratedFunction) (listElement*));
 
 		int verification ();
 		int checkCycle   ();
@@ -60,6 +57,7 @@ class list_T
 		// int dump (int outputFd);
 };
 
-void* fakeCalloc (size_t nmemb, size_t size);
+void* counterCallback   (listElement* currentElement, void* nElementsPtr);
+void* searchingCallback (listElement* currentElement, void* desiredValuePtr);
 
 #endif // LIST_H

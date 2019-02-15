@@ -26,7 +26,7 @@ int testDestruction ();
 int testDeleting ();
 int testAllocateProblem ();
 int testSearch ();
-int testIterateFunc (object elemContent);
+void* testIterateFunc (listElement* currentElement, void* params);
 int testIterate ();
 int testCycle ();
 int testElementsCounter ();
@@ -205,11 +205,13 @@ int testSearch ()
 
 //------------------------------------------------------------------------------
 
-int testIterateFunc (object elemContent)
+void* testIterateFunc (listElement* currentElement, void* params)
 {
-	static int sum = 0;
-	sum = sum + elemContent;
-	return sum;
+	// static int sum = 0;
+	// sum = sum + currentElement->content;
+	*(int*) params += currentElement->content;
+
+	return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -225,9 +227,11 @@ int testIterate ()
 	listElement* elem3 = list.addElementToTail(3);
 	listElement* elem4 = list.addElementToTail(4);
 
-	list.iterate (testIterateFunc);
+	int sum = 0;
 
-	if (testIterateFunc (0) != 1+2+3+4+5)
+	list.iterate (testIterateFunc, &sum);
+
+	if (sum != 1+2+3+4+5)
 		return FAIL;
 
 	return SUCCESS;
