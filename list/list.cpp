@@ -331,23 +331,3 @@ int list_T::countElements ()
 	this->iterate(counterCallback, &nElements);
 	return nElements;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
