@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <sched.h>
+#include <sys/sysinfo.h>
 
 #define PRINT(args...) 		    \
 	do 							\
@@ -31,7 +32,7 @@ const int FAIL_RET    = -1;
 
 const double START_VAL  = 1.0;
 const double FINISH_VAL = 10.0;
-const double STEP       = 5E-9;
+const double STEP       = 7E-10;
 
 struct threadInfo_t
 {
@@ -41,11 +42,11 @@ struct threadInfo_t
 	double integralPart;
 };
 
-int     parseNprocesses (int argc, char** argv);
-unsigned int nMachineProcs ();
+int     parseNprocesses    (int argc, char** argv);
+unsigned int nMachineProcs (int** realProcs);
 
-int calcIntegralFewThreads  (int nRealProcs, int nThreads, double* integral);
-int calcIntegralManyThreads (                int nThreads, double* integral);
+int calcIntegralFewThreads  (int nThreads, double* integral, int nRealProcs, int* realProcs);
+int calcIntegralManyThreads (int nThreads, double* integral);
 
 void*   computeIntegral (void* arg);
 void*   emptyRoutine    (void* arg);
@@ -53,7 +54,11 @@ void*   emptyRoutine    (void* arg);
 int main (int argc, char** argv)
 {
 	int nThreads = parseNprocesses (argc, argv);
-	int nProcs   = nMachineProcs   ();
+
+	int* realProcs = NULL;
+	// printf (" before parsing\n");
+	unsigned int nProcs = nMachineProcs(&realProcs);
+
 	if ((nProcs <= 0) || (nProcs % 2 == 1))
 	{
 		printf ("nProcs = %d, and it is very weird\n", nProcs);
@@ -63,20 +68,23 @@ int main (int argc, char** argv)
 	double integral = 0.0;
 	if ((nThreads > 0) && (nThreads <= nProcs / 2))
 	{
-		calcIntegralFewThreads  (nProcs/2, nThreads, &integral);
+		calcIntegralFewThreads  (nThreads, &integral, nProcs, realProcs);
 	}
 	else if (nThreads > nProcs / 2)
 	{
-		calcIntegralManyThreads (        nThreads, &integral);
+		calcIntegralManyThreads (nThreads, &integral);
 	}
 
 	printf ("result = %lg\n", integral);
+
+	free (realProcs);
+
 	return 0;
 }
 
 //------------------------------------------------------------------------------
 
-int calcIntegralFewThreads  (int nRealProcs, int nThreads, double* integral)
+int calcIntegralFewThreads  (int nThreads, double* integral, int nRealProcs, int* realProcs)
 {
 	// initializing threads
 	pthread_t* threads = (pthread_t*) calloc (nRealProcs, sizeof (*threads));
@@ -102,42 +110,57 @@ int calcIntegralFewThreads  (int nRealProcs, int nThreads, double* integral)
 	}
 
 	// initializing thread attributes
-	pthread_attr_t threadAttributes;
-	int initRet = pthread_attr_init (&threadAttributes);
-	if (initRet != 0)
-	{
-		perror("Problem with pthread_attr_init\n");
-		exit (FAIL_RET);
-	}
+	// pthread_attr_t threadAttributes;
+	// int initRet = pthread_attr_init (&threadAttributes);
+	pthread_attr_t* threadAttributes = (pthread_attr_t*) calloc (nRealProcs, sizeof (pthread_attr_t));
+
 
 	cpu_set_t cpu_set;
-	CPU_ZERO (&cpu_set);
+	int initRet = 0;
+	int setaffinity_ret = 0;
 
 	for (int i = 0; i < nRealProcs; i++)
 	{
-		CPU_SET (i, &cpu_set);
+		initRet = pthread_attr_init (&threadAttributes[i]);
+		if (initRet != 0)
+		{
+			perror ("Problem with pthread_attr_init\n");
+			exit (FAIL_RET);
+		}
+
+		CPU_ZERO (&cpu_set);
+		CPU_SET  (realProcs[i], &cpu_set);
+
+		setaffinity_ret = pthread_attr_setaffinity_np(&threadAttributes[i], sizeof(cpu_set_t), &cpu_set);
+		if (setaffinity_ret != 0)
+		{
+			perror ("some error with set_affinity occured");
+			exit (FAIL_RET);
+		}
 	}
-	int setaffinity_ret = pthread_attr_setaffinity_np(&threadAttributes, sizeof(pthread_attr_t), &cpu_set);
-	if (setaffinity_ret != 0)
-	{
-		perror ("some error with set_affinity occured");
-		exit (FAIL_RET);
-	}
+
+	//
+	// for (int i = 0; i < nRealProcs; i++)
+	// {
+	// 	CPU_SET (i, &cpu_set);
+	// }
 
 	// computing
 	for (int i = 0; i < nRealProcs; i++)
 	{
-		// printf ("i = %d\n", i);
 		if (i < nThreads)
 		{
-			pthread_create (&threads[i], &threadAttributes, computeIntegral, &threadsInformation[i]);
+			printf ("1");
+			pthread_create (&threads[i], &threadAttributes[i], computeIntegral, &threadsInformation[i]);
 		}
 		else
 		{
-			pthread_create (&threads[i], &threadAttributes, emptyRoutine, NULL);
+			printf ("2");
+			pthread_create (&threads[i], &threadAttributes[i], emptyRoutine, NULL);
 		}
 	}
 
+	printf ("\n");
 	for (int i = 0; i < nThreads; i++)
 	{
 		pthread_join (threads[i], 0);
@@ -209,9 +232,40 @@ int calcIntegralManyThreads (int nThreads, double* integral)
 
 //------------------------------------------------------------------------------
 
-unsigned int nMachineProcs ()
+unsigned int nMachineProcs (int** realProcs)
 {
-	return 8;
+	unsigned int nProcs = get_nprocs();
+	*realProcs = (int*) malloc (nProcs * sizeof(**realProcs));
+	if (*realProcs == NULL)
+	{
+		perror ("problem with malloc\n");
+	}
+	for (int i = 0; i < nProcs; i++)
+	{
+		(*realProcs)[i] = -1;
+	}
+
+	unsigned int nRealProcs = 0;
+	int procId = 0;
+	int i = 0;
+	FILE* cpuIdFile = NULL;
+	char fileLocation [] = "/sys/bus/cpu/devices/cpu0/topology/core_id";
+
+	while ((cpuIdFile = fopen(fileLocation, "r")) != NULL)
+	{
+		fscanf (cpuIdFile, "%d", &procId);
+		i = 0;
+		while (((*realProcs)[i] != procId) && ((*realProcs)[i] != -1))
+			i++;
+		if ((*realProcs)[i] == -1)
+		{
+			nRealProcs++;
+			(*realProcs)[i] = procId;
+		}
+
+		fileLocation[24]++;
+	}
+	return nRealProcs;
 }
 
 //------------------------------------------------------------------------------
@@ -223,7 +277,9 @@ void* emptyRoutine (void* arg)
 	pthread_exit (0);
 }
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+#pragma GCC optimize ("03")
 
 void* computeIntegral (void* arg)
 {
@@ -233,7 +289,7 @@ void* computeIntegral (void* arg)
 
 	while (curPosition < thInfo->finishValue)
 	{
-		thInfo->integralPart += (curPosition) / (1 + curPosition) * thInfo->step;
+		thInfo->integralPart += curPosition / (1 + curPosition) * thInfo->step;
 		curPosition += thInfo->step;
 	}
 
