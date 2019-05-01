@@ -32,7 +32,7 @@ const int FAIL_RET    = -1;
 
 const double START_VAL  = 1.0;
 const double FINISH_VAL = 10.0;
-const double STEP       = 7E-10;
+const double STEP       = 1E-9;
 
 struct threadInfo_t
 {
@@ -56,7 +56,6 @@ int main (int argc, char** argv)
 	int nThreads = parseNprocesses (argc, argv);
 
 	int* realProcs = NULL;
-	// printf (" before parsing\n");
 	unsigned int nProcs = nMachineProcs(&realProcs);
 
 	if ((nProcs <= 0) || (nProcs % 2 == 1))
@@ -86,6 +85,7 @@ int main (int argc, char** argv)
 
 int calcIntegralFewThreads  (int nThreads, double* integral, int nRealProcs, int* realProcs)
 {
+	int i = 0;
 	// initializing threads
 	pthread_t* threads = (pthread_t*) calloc (nRealProcs, sizeof (*threads));
 	if (threads == 0)
@@ -101,7 +101,7 @@ int calcIntegralFewThreads  (int nThreads, double* integral, int nRealProcs, int
 		perror ("Calloc has broken\n");
 		exit (FAIL_RET);
 	}
-	for (int i = 0; i < nThreads; i++)
+	for (i = 0; i < nThreads; i++)
 	{
 		threadsInformation[i].startValue   = START_VAL + (FINISH_VAL - START_VAL) / nThreads * i;
 		threadsInformation[i].finishValue  = START_VAL + (FINISH_VAL - START_VAL) / nThreads * (i + 1);
@@ -119,7 +119,7 @@ int calcIntegralFewThreads  (int nThreads, double* integral, int nRealProcs, int
 	int initRet = 0;
 	int setaffinity_ret = 0;
 
-	for (int i = 0; i < nRealProcs; i++)
+	for (i = 0; i < nRealProcs; i++)
 	{
 		initRet = pthread_attr_init (&threadAttributes[i]);
 		if (initRet != 0)
@@ -146,22 +146,22 @@ int calcIntegralFewThreads  (int nThreads, double* integral, int nRealProcs, int
 	// }
 
 	// computing
-	for (int i = 0; i < nRealProcs; i++)
+	for (i = 0; i < nRealProcs; i++)
 	{
 		if (i < nThreads)
 		{
-			printf ("1");
+			// printf ("1");
 			pthread_create (&threads[i], &threadAttributes[i], computeIntegral, &threadsInformation[i]);
 		}
 		else
 		{
-			printf ("2");
+			// printf ("2");
 			pthread_create (&threads[i], &threadAttributes[i], emptyRoutine, NULL);
 		}
 	}
 
 	printf ("\n");
-	for (int i = 0; i < nThreads; i++)
+	for (i = 0; i < nThreads; i++)
 	{
 		pthread_join (threads[i], 0);
 		*integral += threadsInformation[i].integralPart;
@@ -178,6 +178,7 @@ int calcIntegralFewThreads  (int nThreads, double* integral, int nRealProcs, int
 
 int calcIntegralManyThreads (int nThreads, double* integral)
 {
+	int i = 0;
 	// initializing threads
 	pthread_t* threads = (pthread_t*) calloc (nThreads, sizeof (*threads));
 	if (threads == 0)
@@ -193,7 +194,7 @@ int calcIntegralManyThreads (int nThreads, double* integral)
 		perror ("Calloc has broken\n");
 		exit (FAIL_RET);
 	}
-	for (int i = 0; i < nThreads; i++)
+	for (i = 0; i < nThreads; i++)
 	{
 		threadsInformation[i].startValue   = START_VAL + (FINISH_VAL - START_VAL) / nThreads * i;
 		threadsInformation[i].finishValue  = START_VAL + (FINISH_VAL - START_VAL) / nThreads * (i + 1);
@@ -211,13 +212,13 @@ int calcIntegralManyThreads (int nThreads, double* integral)
 	}
 
 	// computing
-	for (int i = 0; i < nThreads; i++)
+	for (i = 0; i < nThreads; i++)
 	{
 		// printf ("i = %d\n", i);
 		pthread_create (&threads[i], &threadAttributes, computeIntegral, &threadsInformation[i]);
 	}
 
-	for (int i = 0; i < nThreads; i++)
+	for (i = 0; i < nThreads; i++)
 	{
 		pthread_join (threads[i], 0);
 		*integral += threadsInformation[i].integralPart;
@@ -234,20 +235,21 @@ int calcIntegralManyThreads (int nThreads, double* integral)
 
 unsigned int nMachineProcs (int** realProcs)
 {
+	int i = 0;
 	unsigned int nProcs = get_nprocs();
 	*realProcs = (int*) malloc (nProcs * sizeof(**realProcs));
 	if (*realProcs == NULL)
 	{
 		perror ("problem with malloc\n");
 	}
-	for (int i = 0; i < nProcs; i++)
+	for (i = 0; i < nProcs; i++)
 	{
 		(*realProcs)[i] = -1;
 	}
 
 	unsigned int nRealProcs = 0;
 	int procId = 0;
-	int i = 0;
+	i = 0;
 	FILE* cpuIdFile = NULL;
 	char fileLocation [] = "/sys/bus/cpu/devices/cpu0/topology/core_id";
 
