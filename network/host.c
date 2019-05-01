@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -20,12 +22,17 @@
 		{															\
 			printf ("Error, line = %d\n", __LINE__);				\
 			perror (message);										\
-			exit(-1);												\
+			exit(FAIL_RET);											\
 		}															\
 	}while (0);
 
 const int SUCCESS_RET =  0;
 const int FAIL_RET    = -1;
+
+const int TCP_PORT = 3000;
+const int UDP_PORT = 3001;
+
+int makeUdpBroadcastSocket ();
 
 int parseNslaves (int argc, char** argv);
 
@@ -35,38 +42,75 @@ int main(int argc, char** argv)
 
 	int nSlaves = parseNslaves(argc, argv);
 
-	in_port_t tcpPort = htons(3000);
-	in_port_t udpPort = htons(3001);
-
-	int skUdp = socket (PF_INET, SOCK_DGRAM, 0);
-	CHECK (skUdp, "Socket failed\n");
-
-	int val = 1;
-	int setsockoptRet = setsockopt (skUdp, SOL_SOCKET, SO_BROADCAST, &val, sizeof(val));
-	CHECK (setsockoptRet, "Setsockopt failed");
-
-	struct sockaddr_in* addresses = (struct sockaddr_in*) calloc (nSlaves, sizeof(*addresses));
-
-	for (int i = 0; i < nSlaves; i++)
-	{
-		addresses[i].sin_family      = AF_INET;
-		addresses[i].sin_port        = udpPort;
-		addresses[i].sin_addr.s_addr = INADDR_BROADCAST;
-	}
+	// in_port_t tcpPort = htons(TCP_PORT);
+	// in_port_t udpPort = htons(UDP_PORT);
+	//
+	// int skUdp = socket (PF_INET, SOCK_DGRAM, 0);
+	// CHECK (skUdp, "Socket failed\n");
+	//
+	// int val = 1;
+	// int setsockoptRet = setsockopt (skUdp, SOL_SOCKET, SO_BROADCAST, &val, sizeof(val));
+	// CHECK (setsockoptRet, "Setsockopt failed");
+	//
+	// struct sockaddr_in* addresses = (struct sockaddr_in*) calloc (nSlaves, sizeof(*addresses));
+	//
+	// for (int i = 0; i < nSlaves; i++)
+	// {
+	// 	addresses[i].sin_family      = AF_INET;
+	// 	addresses[i].sin_port        = udpPort;
+	// 	addresses[i].sin_addr.s_addr = INADDR_BROADCAST;
+	// }
 
 	// int A = 666;
 	// printf ("Before : %o\n", addresses[0].sin_addr.s_addr);
 
+	int skUdp = makeUdpBroadcastSocket ();
+
+	struct sockaddr_in slaveAddr;
+
 	for (int i = 0; i < nSlaves; i++)
 	{
-		int sendRet = sendto (skUdp, &i, sizeof(i), 0, (void*)&(addresses[i]), sizeof(addresses[i]));
-		printf ("s_addr = %o\n", addresses[i].sin_addr.s_addr);
+		int sendRet = sendto (skUdp, &i, sizeof(i), 0, (void*)&slaveAddr, sizeof(slaveAddr));
+		printf ("s_addr = %o\n", slaveAddr.sin_addr.s_addr);
 	}
 
 	int skTcp = -1;
 
 
 	return 0;
+}
+
+
+//------------------------------------------------------------------------------
+
+int makeUdpBroadcastSocket ()
+{
+	int skUdp = socket (PF_INET, SOCK_DGRAM, 0);
+	CHECK (skUdp, "socket failed\n");
+
+	int val = 1;
+	int setsockoptRet = setsockopt (skUdp, SOL_SOCKET, SO_BROADCAST, &val, sizeof(val));
+	if (setsockoptRet == -1)
+	{
+		close (skUdp);
+		CHECK (setsockoptRet, "Setsockopt failed\n");
+	}
+
+	struct sockaddr_in addr =
+	{
+		.sin_family      = AF_INET,
+		.sin_port        = htons(UDP_PORT),
+		.sin_addr.s_addr = INADDR_BROADCAST,
+	};
+
+	int bindRet = bind (skUdp, (void*)&addr, sizeof (addr));
+	if (bindRet == -1)
+	{
+		close (skUdp);
+		CHECK (bindRet, "bind failed\n");
+	}
+
+	return skUdp;
 }
 
 //------------------------------------------------------------------------------

@@ -34,6 +34,9 @@
 const int SUCCESS_RET =  0;
 const int FAIL_RET    = -1;
 
+const int TCP_PORT = 3000;
+const int UDP_PORT = 3001;
+
 int parseNthreads (int argc, char** argv);
 
 int main (int argc, char** argv)
@@ -41,8 +44,8 @@ int main (int argc, char** argv)
 	int nThreads = parseNthreads (argc, argv);
 	printf ("Slave, nThreads = %d\n", nThreads);
 
-	in_port_t tcpPort = htons(3000);
-	in_port_t udpPort = htons(3001);
+	in_port_t tcpPort = htons(TCP_PORT);
+	in_port_t udpPort = htons(UDP_PORT);
 
 	int sk = socket (PF_INET, SOCK_DGRAM, 0);
 	CHECK (sk, "Socket failed\n");
