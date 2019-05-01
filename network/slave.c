@@ -11,31 +11,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-
-#define PRINT(args...) 		    \
-	do 							\
-	{							\
-		printf(args);           \
-		fflush (stdout);        \
-	}while (0);
-
-
-#define CHECK(what, message)										\
-	do 																\
-	{																\
-		if (what == -1)												\
-		{															\
-			printf ("Error, line = %d\n", __LINE__);				\
-			perror (message);										\
-			exit(-1);												\
-		}															\
-	}while (0);
-
-const int SUCCESS_RET =  0;
-const int FAIL_RET    = -1;
-
-const int TCP_PORT = 3000;
-const int UDP_PORT = 3001;
+#include "network.h"
 
 int parseNthreads (int argc, char** argv);
 
@@ -47,38 +23,50 @@ int main (int argc, char** argv)
 	in_port_t tcpPort = htons(TCP_PORT);
 	in_port_t udpPort = htons(UDP_PORT);
 
-	int sk = socket (PF_INET, SOCK_DGRAM, 0);
-	CHECK (sk, "Socket failed\n");
+	// int sk = socket (PF_INET, SOCK_DGRAM, 0);
+	// CHECK (sk, "Socket failed\n");
+	//
+	// int val = 1;
+	// int setsockoptRet = setsockopt (sk, SOL_SOCKET, SO_BROADCAST, &val, sizeof(val));
+	// CHECK (setsockoptRet, "Setsockopt failed");
+	//
+	//
+	// struct sockaddr_in addr =
+	// {
+	// 	.sin_family = AF_INET,
+	// 	.sin_port   = udpPort,
+	// 	.sin_addr   = INADDR_BROADCAST
+	// };
+	//
+	// int bindRet = bind (sk, &addr, sizeof(addr));
+	// CHECK (bindRet, "Bind failed\n");
+	//
+	// struct sockaddr_in hostAddr;
+	//
+	// int A = 3;
+	//
+	// socklen_t hostAddrLen = sizeof(hostAddr);
+	// int recvFromRet = recvfrom (sk, &A, sizeof(A), 0, &hostAddr, &hostAddrLen);
+	//
+	// printf ("A = %d\n", A);
+	// printf ("hostAddr : %o\n", hostAddr.sin_addr.s_addr);
+	//
+	// int skTcp = -1;
+	// int connectRet = connect (skTcp, &hostAddr, hostAddrLen);
+	// CHECK (connectRet, "Connect failed\n");
 
-	int val = 1;
-	int setsockoptRet = setsockopt (sk, SOL_SOCKET, SO_BROADCAST, &val, sizeof(val));
-	CHECK (setsockoptRet, "Setsockopt failed");
-
-
-	struct sockaddr_in addr =
-	{
-		.sin_family = AF_INET,
-		.sin_port   = udpPort,
-		.sin_addr   = INADDR_BROADCAST
-	};
-
-	int bindRet = bind (sk, &addr, sizeof(addr));
-	CHECK (bindRet, "Bind failed\n");
+	int skUdp = makeUdpBroadcastSocket ();
 
 	struct sockaddr_in hostAddr;
+	socklen_t hostAddrLen;
 
-	int A = 3;
+	int msg = -1;
 
-	socklen_t hostAddrLen = sizeof(hostAddr);
-	int recvFromRet = recvfrom (sk, &A, sizeof(A), 0, &hostAddr, &hostAddrLen);
+	int recvfromRet = recvfrom (skUdp, &msg, sizeof(msg), 0, (void*)&hostAddr, &hostAddrLen);
+	CHECK (recvfromRet, "recvfrom failed");
 
-	printf ("A = %d\n", A);
-	printf ("hostAddr : %o\n", hostAddr.sin_addr.s_addr);
-
-	int skTcp = -1;
-	int connectRet = connect (skTcp, &hostAddr, hostAddrLen);
-	CHECK (connectRet, "Connect failed\n");
-
+	printf ("recvfrom returned %d\n", recvfromRet);
+	printf ("msg = %d\n", msg);
 
 	return 0;
 }
