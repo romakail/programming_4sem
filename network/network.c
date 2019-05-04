@@ -14,7 +14,7 @@ int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 	printf ("&msg  = %p\n"          , &msg);
 	printf ("sizeof(msg)  = %ld\n"  , sizeof(msg));
 	printf ("(void*)hostAddr = %p\n", (void*)hostAddr);
-	printf ("hostAddrLen = %ls\n"   , hostAddrLen);
+	printf ("hostAddrLen = %p\n"   , hostAddrLen);
 
 	int recvfromRet = recvfrom (skUdp, &msg, sizeof(msg), 0, (void*)hostAddr, hostAddrLen);
 	CHECK (recvfromRet, "recvfrom failed\n");
@@ -159,8 +159,16 @@ int makeUdpBroadcastSocket ()
 	int skUdp = socket (PF_INET, SOCK_DGRAM, 0);
 	CHECK (skUdp, "socket failed\n");
 
-	int val = 1;
-	int setsockoptRet = setsockopt (skUdp, SOL_SOCKET, SO_BROADCAST, &val, sizeof(val));
+	int brcVal = 1;
+	int setsockoptRet = setsockopt (skUdp, SOL_SOCKET, SO_BROADCAST, &brcVal, sizeof(brcVal));
+	if (setsockoptRet == -1)
+	{
+		close (skUdp);
+		CHECK (setsockoptRet, "Setsockopt failed\n");
+	}
+
+	int ruaVal = 1;
+	setsockoptRet = setsockopt (skUdp, SOL_SOCKET, SO_REUSEADDR, &ruaVal, sizeof(ruaVal));
 	if (setsockoptRet == -1)
 	{
 		close (skUdp);
