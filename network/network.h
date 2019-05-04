@@ -15,8 +15,8 @@
 #define SUCCESS_RET 0
 #define FAIL_RET    -1
 
-#define TCP_PORT  3000
-#define UDP_PORT  3001
+#define TCP_PORT  4000
+#define UDP_PORT  4001
 
 #define BROADCASTING_MSG 666
 #define WAITING_SECONDS 10
@@ -49,7 +49,7 @@ struct slave_t
 	struct sockaddr addr;
 	socklen_t addrLen;
 
-	int nThreads; 
+	int nThreads;
 };
 
 

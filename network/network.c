@@ -42,10 +42,11 @@ int broadcastUdpMsg ()
         .sin_addr   = INADDR_BROADCAST
     };
 
-	int msg = 666;
+	int msg = BROADCASTING_MSG;
 	int sendtoRet = sendto (skUdp, &msg, sizeof(msg), 0, (void*)&broadcastAddr, sizeof(broadcastAddr));
 	CHECK (sendtoRet, "sendto failed\n");
 
+	printf ("Finished broadcastUdpMsg\n");
 	return SUCCESS_RET;
 }
 
@@ -118,12 +119,6 @@ int makeTcpListeningSocket ()
 
 	// Might have some setsockopt operations
 
-	int listenRet = listen (skTcp, 256);
-	if (listenRet == -1)
-	{
-		close (skTcp);
-		CHECK (listenRet, "listen failed\n");
-	}
 
 	struct sockaddr_in addr =
 	{
@@ -139,6 +134,13 @@ int makeTcpListeningSocket ()
 		CHECK (bindRet, "bind failed\n");
 	}
 
+	int listenRet = listen (skTcp, 256);
+	if (listenRet == -1)
+	{
+		close (skTcp);
+		CHECK (listenRet, "listen failed\n");
+	}
+	
 	return skTcp;
 }
 
@@ -171,5 +173,6 @@ int makeUdpBroadcastSocket ()
 		CHECK (bindRet, "bind failed\n");
 	}
 
+	printf ("Made an UdpBroadcastSocket %d\n", skUdp);
 	return skUdp;
 }
