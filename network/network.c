@@ -11,7 +11,12 @@ int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 
 	int recvfromRet = recvfrom (skUdp, &msg, sizeof(msg), 0, (void*)hostAddr, hostAddrLen);
 	CHECK (recvfromRet, "recvfrom failed\n");
-	CHECK (msg == BROADCASTING_MSG, "Got wrong message\n");
+	// CHECK (msg == BROADCASTING_MSG, "Got wrong message\n")
+	if (msg != BROADCASTING_MSG)
+	{
+		perror ("Got wrong message\n");
+		return FAIL_RET;
+	}
 
 
 	printf ("recvfrom returned %d\n", recvfromRet);
