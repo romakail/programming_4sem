@@ -5,7 +5,7 @@ int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 {
 	int skUdp = makeUdpBroadcastSocket ();
 
-	printf ("hostPort before : %d", hostAddr->sin_port);
+	printf ("hostPort before : %d\n", hostAddr->sin_port);
 
 	int msg = -1;
 
@@ -140,7 +140,7 @@ int makeTcpListeningSocket ()
 		close (skTcp);
 		CHECK (listenRet, "listen failed\n");
 	}
-	
+
 	return skTcp;
 }
 
