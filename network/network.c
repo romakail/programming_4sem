@@ -127,6 +127,13 @@ int makeTcpListeningSocket ()
 
 	// Might have some setsockopt operations
 
+	int ruaVal = 1;
+	int setsockoptRet = setsockopt (skTcp, SOL_SOCKET, SO_REUSEADDR, &ruaVal, sizeof(ruaVal));
+	if (setsockoptRet == -1)
+	{
+		close (skTcp);
+		CHECK (setsockoptRet, "Setsockopt failed\n");
+	}
 
 	struct sockaddr_in addr =
 	{
