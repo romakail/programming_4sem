@@ -20,8 +20,8 @@ int main (int argc, char** argv)
 	int nThreads = parseNthreads (argc, argv);
 	printf ("Slave, nThreads = %d\n", nThreads);
 
-	in_port_t tcpPort = htons(TCP_PORT);
-	in_port_t udpPort = htons(UDP_PORT);
+	// in_port_t tcpPort = htons(TCP_PORT);
+	// in_port_t udpPort = htons(UDP_PORT);
 
 	// int sk = socket (PF_INET, SOCK_DGRAM, 0);
 	// CHECK (sk, "Socket failed\n");
@@ -61,16 +61,19 @@ int main (int argc, char** argv)
 	CHECK (getHostsAddressRet, "GetHostsAddress failed\n");
 
 
-	int skTcp = -1;
-	struct timeval tv = {
-        .tv_sec     = 10,
-        .tv_usec    = 0,
-    };
+	// int skTcp = -1;
+	// struct timeval tv = {
+    //     .tv_sec     = 10,
+    //     .tv_usec    = 0,
+    // };
 
+	int skTcp = makeConnectedTcpSocket ((struct sockaddr*)&hostAddr, &hostAddrLen);
+	CHECK (skTcp, "makeConnectedTcpSocket failed\n");
 
+	int sendtoRet = send (skTcp, &nThreads, sizeof(nThreads), 0);
+	printf ("Sent %d bytes\n", sendtoRet);
 
-
-	return 0;
+	return SUCCESS_RET;
 }
 
 //------------------------------------------------------------------------------

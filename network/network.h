@@ -45,14 +45,20 @@
 struct slave_t
 {
 	int socket;
+	int number;
+	struct sockaddr addr;
+	socklen_t addrLen;
+
+	int nThreads; 
 };
 
 
 int makeUdpBroadcastSocket ();
 int makeTcpListeningSocket ();
-int makeConnectedTcpSocket (const struct sockaddr* hostAddr);
+int makeConnectedTcpSocket (const struct sockaddr* hostAddr, const socklen_t* hostAddrLen);
 
-int getAllSlaves (struct slave_t* slaves, int nSlaves);
+
+int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp);
 int broadcastUdpMsg ();
 int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen);
 
