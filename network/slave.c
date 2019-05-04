@@ -49,24 +49,26 @@ int main (int argc, char** argv)
 	// int recvFromRet = recvfrom (sk, &A, sizeof(A), 0, &hostAddr, &hostAddrLen);
 	//
 	// printf ("A = %d\n", A);
-	// printf ("hostAddr : %o\n", hostAddr.sin_addr.s_addr);
 	//
 	// int skTcp = -1;
 	// int connectRet = connect (skTcp, &hostAddr, hostAddrLen);
 	// CHECK (connectRet, "Connect failed\n");
 
-	int skUdp = makeUdpBroadcastSocket ();
-
 	struct sockaddr_in hostAddr;
 	socklen_t hostAddrLen;
 
-	int msg = -1;
+	int getHostsAddressRet = getHostsAddress (&hostAddr, &hostAddrLen);
+	CHECK (getHostsAddressRet, "GetHostsAddress failed\n");
 
-	int recvfromRet = recvfrom (skUdp, &msg, sizeof(msg), 0, (void*)&hostAddr, &hostAddrLen);
-	CHECK (recvfromRet, "recvfrom failed");
 
-	printf ("recvfrom returned %d\n", recvfromRet);
-	printf ("msg = %d\n", msg);
+	int skTcp = -1;
+	struct timeval tv = {
+        .tv_sec     = 10,
+        .tv_usec    = 0,
+    };
+
+
+
 
 	return 0;
 }

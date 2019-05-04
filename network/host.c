@@ -42,20 +42,11 @@ int main(int argc, char** argv)
 
 	//===============================Broadcasting===============================
 
-	int skUdp = makeUdpBroadcastSocket ();
-
-	struct sockaddr_in broadcastAddr =
-	{
-        .sin_family = AF_INET,
-        .sin_port   = htons(UDP_PORT),
-        .sin_addr   = INADDR_BROADCAST
-    };
-
-	int msg = 666;
-	int sendtoRet = sendto (skUdp, &msg, sizeof(msg), 0, (void*)&broadcastAddr, sizeof(broadcastAddr));
-	CHECK (sendtoRet, "sendto failed\n");
+	int broadcastRet = broadcastUdpMsg ();
+	CHECK (broadcastRet, "broadcastUdpMsg failed\n");
 
 	int skTcp = -1;
+
 
 
 	return 0;
