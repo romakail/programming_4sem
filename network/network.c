@@ -9,6 +9,13 @@ int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 
 	int msg = -1;
 
+	printf ("---------//---------\n");
+	printf ("skUdp = %d\n"          , skUdp);
+	printf ("&msg  = %p\n"          , &msg);
+	printf ("sizeof(msg)  = %ld\n"  , sizeof(msg));
+	printf ("(void*)hostAddr = %p\n", (void*)hostAddr);
+	printf ("hostAddrLen = %ls\n"   , hostAddrLen);
+
 	int recvfromRet = recvfrom (skUdp, &msg, sizeof(msg), 0, (void*)hostAddr, hostAddrLen);
 	CHECK (recvfromRet, "recvfrom failed\n");
 	// CHECK (msg == BROADCASTING_MSG, "Got wrong message\n")
@@ -106,7 +113,7 @@ int makeConnectedTcpSocket (const struct sockaddr* hostAddr, const socklen_t* ho
 		close (skTcp);
 		CHECK (connectRet, "connect failed\n");
 	}
-	
+
 	printf ("Returning from make makeConnectedTcpSocket\n");
 	return skTcp;
 }

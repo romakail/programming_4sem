@@ -19,7 +19,7 @@
 #define UDP_PORT  4001
 
 #define BROADCASTING_MSG 666
-#define WAITING_SECONDS 10
+#define WAITING_SECONDS 5
 
 
 #define PRINT(args...) 		    \

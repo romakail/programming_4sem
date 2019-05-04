@@ -42,6 +42,9 @@ int main(int argc, char** argv)
 
 	//===============================Broadcasting===============================
 
+	int skTcp = makeTcpListeningSocket ();
+	CHECK (skTcp, "makeTcpListeningSocket failed\n");
+
 	int broadcastRet = broadcastUdpMsg ();
 	CHECK (broadcastRet, "broadcastUdpMsg failed\n");
 
@@ -53,8 +56,6 @@ int main(int argc, char** argv)
 	}
 
 
-	int skTcp = makeTcpListeningSocket ();
-	CHECK (skTcp, "makeTcpListeningSocket failed\n");
 
 	int getSlavesSocketsRet = getSlavesSockets (slaves, nSlaves, skTcp);
 	CHECK (getSlavesSocketsRet, "getSlavesSocketsAndThreads failed\n");
