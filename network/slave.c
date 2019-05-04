@@ -61,11 +61,11 @@ int main (int argc, char** argv)
 	CHECK (getHostsAddressRet, "GetHostsAddress failed\n");
 
 
-	// int skTcp = makeConnectedTcpSocket ((struct sockaddr*)&hostAddr, &hostAddrLen);
-	// CHECK (skTcp, "makeConnectedTcpSocket failed\n");
-	//
-	// int sendtoRet = send (skTcp, &nThreads, sizeof(nThreads), 0);
-	// printf ("Sent %d bytes\n", sendtoRet);
+	int skTcp = makeConnectedTcpSocket ((struct sockaddr*)&hostAddr, &hostAddrLen);
+	CHECK (skTcp, "makeConnectedTcpSocket failed\n");
+
+	int sendtoRet = send (skTcp, &nThreads, sizeof(nThreads), 0);
+	printf ("Sent %d bytes\n", sendtoRet);
 
 	return SUCCESS_RET;
 }

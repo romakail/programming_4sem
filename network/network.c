@@ -106,7 +106,8 @@ int makeConnectedTcpSocket (const struct sockaddr* hostAddr, const socklen_t* ho
 		close (skTcp);
 		CHECK (connectRet, "connect failed\n");
 	}
-
+	
+	printf ("Returning from make makeConnectedTcpSocket\n");
 	return skTcp;
 }
 
