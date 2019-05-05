@@ -1,7 +1,7 @@
 #include "network.h"
 
 
-int getHostsAddress (struct sockaddr* hostAddr, socklen_t* hostAddrLen)
+int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 {
 	int skUdp = makeUdpBroadcastSocket ();
 
@@ -101,7 +101,7 @@ int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp)
 
 //------------------------------------------------------------------------------
 
-int makeConnectedTcpSocket (const struct sockaddr* hostAddr, const socklen_t* hostAddrLen)
+int makeConnectedTcpSocket (const struct sockaddr_in* hostAddr, const socklen_t* hostAddrLen)
 {
 	int skTcp = socket (AF_INET, SOCK_STREAM, 0);
 	CHECK (skTcp, "socket failed\n");

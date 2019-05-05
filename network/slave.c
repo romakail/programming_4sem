@@ -54,7 +54,7 @@ int main (int argc, char** argv)
 	// int connectRet = connect (skTcp, &hostAddr, hostAddrLen);
 	// CHECK (connectRet, "Connect failed\n");
 
-	struct sockaddr hostAddr;
+	struct sockaddr_in hostAddr;
 	socklen_t hostAddrLen;
 
 	int getHostsAddressRet = getHostsAddress (&hostAddr, &hostAddrLen);
