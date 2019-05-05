@@ -15,8 +15,8 @@
 #define SUCCESS_RET 0
 #define FAIL_RET    -1
 
-#define TCP_PORT  4000
-#define UDP_PORT  4001
+#define UDP_PORT  4000
+#define TCP_PORT  4001
 
 #define BROADCASTING_MSG 666
 #define WAITING_SECONDS 5

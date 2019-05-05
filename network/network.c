@@ -14,7 +14,7 @@ int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 	printf ("&msg  = %p\n"          , &msg);
 	printf ("sizeof(msg)  = %ld\n"  , sizeof(msg));
 	printf ("(void*)hostAddr = %p\n", (void*)hostAddr);
-	printf ("hostAddrLen = %p\n"   , hostAddrLen);
+	printf ("hostAddrLen = %p\n"    , hostAddrLen);
 
 	int recvfromRet = recvfrom (skUdp, &msg, sizeof(msg), 0, (void*)hostAddr, hostAddrLen);
 	CHECK (recvfromRet, "recvfrom failed\n");
