@@ -106,6 +106,14 @@ int makeConnectedTcpSocket (const struct sockaddr* hostAddr, const socklen_t* ho
 	int skTcp = socket (AF_INET, SOCK_STREAM, 0);
 	CHECK (skTcp, "socket failed\n");
 
+	int ruaVal = 1;
+	int setsockoptRet = setsockopt (skTcp, SOL_SOCKET, SO_REUSEADDR, &ruaVal, sizeof(ruaVal));
+	if (setsockoptRet == -1)
+	{
+		close (skTcp);
+		CHECK (setsockoptRet, "Setsockopt failed\n");
+	}
+
 	printf ("Started connecting\n");
 	int connectRet = connect (skTcp, hostAddr, *hostAddrLen);
 	if (connectRet == -1)
