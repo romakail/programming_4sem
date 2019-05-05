@@ -1,11 +1,11 @@
 #include "network.h"
 
 
-int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
+int getHostsAddress (struct sockaddr* hostAddr, socklen_t* hostAddrLen)
 {
 	int skUdp = makeUdpBroadcastSocket ();
 
-	printf ("hostPort before : %d\n", hostAddr->sin_port);
+	// printf ("hostPort before : %d\n", hostAddr->sin_port);
 
 	int msg = -1;
 
@@ -28,10 +28,10 @@ int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 
 	printf ("recvfrom returned %d\n", recvfromRet);
 	printf ("msg = %d\n", msg);
-	printf ("hostAddr : %o\n", hostAddr->sin_addr.s_addr);
-	printf ("hostPort after : %d\n", hostAddr->sin_port);
+	// printf ("hostAddr : %o\n", hostAddr->sin_addr.s_addr);
+	// printf ("hostPort after : %d\n", hostAddr->sin_port);
 
-	hostAddr->sin_port = htons (TCP_PORT);
+	// hostAddr->sin_port = htons (TCP_PORT);
 
 	return SUCCESS_RET;
 }

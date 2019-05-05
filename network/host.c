@@ -48,25 +48,25 @@ int main(int argc, char** argv)
 	int broadcastRet = broadcastUdpMsg ();
 	CHECK (broadcastRet, "broadcastUdpMsg failed\n");
 
-	// struct slave_t* slaves = (struct slave_t*) calloc (nSlaves, sizeof(&slaves));
-	// if (slaves == 0)
-	// {
-	// 	perror ("calloc failed");
-	// 	return FAIL_RET;
-	// }
-	//
-	//
-	//
-	// int getSlavesSocketsRet = getSlavesSockets (slaves, nSlaves, skTcp);
-	// CHECK (getSlavesSocketsRet, "getSlavesSocketsAndThreads failed\n");
-	// 
-	//
-	// int recvRet = recv (slaves[0].socket, &(slaves[0].nThreads), sizeof(slaves[0].nThreads), 0);
-	// printf ("recv returned %d\n", recvRet);
-	// printf ("Slave's no %d nThreads = %d\n", slaves[0].number, slaves[0].nThreads);
-	//
-	//
-	// free (slaves);
+	struct slave_t* slaves = (struct slave_t*) calloc (nSlaves, sizeof(&slaves));
+	if (slaves == 0)
+	{
+		perror ("calloc failed");
+		return FAIL_RET;
+	}
+
+
+
+	int getSlavesSocketsRet = getSlavesSockets (slaves, nSlaves, skTcp);
+	CHECK (getSlavesSocketsRet, "getSlavesSocketsAndThreads failed\n");
+
+
+	int recvRet = recv (slaves[0].socket, &(slaves[0].nThreads), sizeof(slaves[0].nThreads), 0);
+	printf ("recv returned %d\n", recvRet);
+	printf ("Slave's no %d nThreads = %d\n", slaves[0].number, slaves[0].nThreads);
+
+
+	free (slaves);
 	return SUCCESS_RET;
 }
 

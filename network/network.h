@@ -60,6 +60,6 @@ int makeConnectedTcpSocket (const struct sockaddr* hostAddr, const socklen_t* ho
 
 int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp);
 int broadcastUdpMsg ();
-int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen);
+int getHostsAddress (struct sockaddr* hostAddr, socklen_t* hostAddrLen);
 
 #endif /* network_h */
