@@ -13,7 +13,8 @@ int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 	printf ("skUdp = %d\n"          , skUdp);
 	printf ("&msg  = %p\n"          , &msg);
 	printf ("sizeof(msg)  = %ld\n"  , sizeof(msg));
-	printf ("(void*)hostAddr = %p\n", (void*)hostAddr);
+	printf ("hostAddr = %d\n", (*hostAddr).sin_addr.s_addr);
+	printf ("hostAddr = %o\n", (*hostAddr).sin_addr.s_addr);
 	printf ("hostAddrLen = %p\n"    , hostAddrLen);
 
 	int recvfromRet = recvfrom (skUdp, &msg, sizeof(msg), 0, (void*)hostAddr, hostAddrLen);
@@ -28,6 +29,7 @@ int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 
 	printf ("recvfrom returned %d\n", recvfromRet);
 	printf ("msg = %d\n", msg);
+	printf ("hostAddr = %o\n", (*hostAddr).sin_addr.s_addr);
 	// printf ("hostAddr : %o\n", hostAddr->sin_addr.s_addr);
 	// printf ("hostPort after : %d\n", hostAddr->sin_port);
 
@@ -174,6 +176,7 @@ int makeTcpListeningSocket ()
 		CHECK (listenRet, "listen failed\n");
 	}
 
+	printf ("Now we have a listening socket %d\n", skTcp);
 	return skTcp;
 }
 
