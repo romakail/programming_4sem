@@ -121,8 +121,7 @@ int makeConnectedTcpSocket (const struct sockaddr_in* hostAddr, const socklen_t*
 	}
 
 	printf ("Started connecting\n");
-	// int connectRet = connect (skTcp, (void*)hostAddr, *hostAddrLen);
-	int connectRet = connect (skTcp, (void*)hostAddr, sizeof(hostAddr));
+	int connectRet = connect (skTcp, (void*)hostAddr, *hostAddrLen);
 	if (errno == EINPROGRESS)
 	{
 		printf ("Errno in progress\n");
