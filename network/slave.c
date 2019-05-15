@@ -57,9 +57,8 @@ int main (int argc, char** argv)
 	struct sockaddr_in hostAddr;
 	socklen_t hostAddrLen = sizeof (hostAddr);
 
-	int getHostsAddressRet = getHostsAddress (&hostAddr, &hostAddrLen);
-	CHECK (getHostsAddressRet, "GetHostsAddress failed\n");
-	sleep (1);
+	int getHostAddressRet = getHostAddress (&hostAddr, &hostAddrLen);
+	CHECK (getHostAddressRet, "getHostAddress failed\n");
 
 	int skTcp = makeConnectedTcpSocket (&hostAddr, &hostAddrLen);
 	CHECK (skTcp, "makeConnectedTcpSocket failed\n");

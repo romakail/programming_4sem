@@ -3,9 +3,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -60,6 +62,6 @@ int makeConnectedTcpSocket (const struct sockaddr_in* hostAddr, const socklen_t*
 
 int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp);
 int broadcastUdpMsg ();
-int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen);
+int getHostAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen);
 
 #endif /* network_h */

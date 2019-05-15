@@ -1,7 +1,7 @@
 #include "network.h"
 
 
-int getHostsAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
+int getHostAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 {
 	int skUdp = makeUdpBroadcastSocket ();
 
@@ -109,6 +109,37 @@ int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp)
 
 //------------------------------------------------------------------------------
 
+// int makeConnectedTcpSocket (const struct sockaddr_in* hostAddr, const socklen_t* hostAddrLen)
+// {
+// 	int skTcp = socket (AF_INET, SOCK_STREAM, 0);
+// 	CHECK (skTcp, "socket failed\n");
+//
+// 	int ruaVal = 1;
+// 	int setsockoptRet = setsockopt (skTcp, SOL_SOCKET, SO_REUSEADDR, &ruaVal, sizeof(ruaVal));
+// 	if (setsockoptRet == -1)
+// 	{
+// 		close (skTcp);
+// 		CHECK (setsockoptRet, "Setsockopt failed\n");
+// 	}
+//
+// 	printf ("Started connecting\n");
+// 	int connectRet = connect (skTcp, (void*)hostAddr, *hostAddrLen);
+// 	if (errno == EINPROGRESS)
+// 	{
+// 		printf ("Errno in progress\n");
+// 	}
+// 	if (connectRet == -1)
+// 	{
+// 		close (skTcp);
+// 		CHECK (connectRet, "connect failed\n");
+// 	}
+//
+// 	printf ("Returning from make makeConnectedTcpSocket\n");
+// 	return skTcp;
+// }
+
+//------------------------------------------------------------------------------
+
 int makeConnectedTcpSocket (const struct sockaddr_in* hostAddr, const socklen_t* hostAddrLen)
 {
 	int skTcp = socket (AF_INET, SOCK_STREAM, 0);
@@ -122,16 +153,64 @@ int makeConnectedTcpSocket (const struct sockaddr_in* hostAddr, const socklen_t*
 		CHECK (setsockoptRet, "Setsockopt failed\n");
 	}
 
-	printf ("Started connecting\n");
-	int connectRet = connect (skTcp, (void*)hostAddr, *hostAddrLen);
-	if (errno == EINPROGRESS)
-	{
-		printf ("Errno in progress\n");
-	}
-	if (connectRet == -1)
+	int fcntlRet = fcntl (skTcp, F_SETFL, O_NONBLOCK);
+	if (fcntlRet == -1)
 	{
 		close (skTcp);
-		CHECK (connectRet, "connect failed\n");
+		CHECK (fcntlRet, "Fcntl failed\n");
+	}
+
+	fd_set set;
+	FD_ZERO(&set);
+	FD_SET(skTcp, &set);
+
+	struct timeval timeout =
+	{
+		.tv_sec  = WAITING_SECONDS,
+		.tv_usec = 0,
+	};
+
+	printf ("Started connecting\n");
+	int connectRet = connect (skTcp, (void*)hostAddr, *hostAddrLen);
+
+	if ((connectRet == -1) && (errno = EINPROGRESS))
+	{
+		errno = 0;
+		int selectRet = select(skTcp + 1, 0, &set, 0, &timeout);
+		if (selectRet == 0)
+		{
+			close (skTcp);
+			printf ("Select timed out\n");
+			return FAIL_RET;
+		}
+		if (selectRet == -1)
+		{
+			close (skTcp);
+			perror ("Select failed\n");
+			return FAIL_RET;
+		}
+
+		int errval = 0;
+		socklen_t len = sizeof(errval);
+		if(getsockopt(skTcp, SOL_SOCKET, SO_ERROR, &errval, &len) < 0)
+		{
+			close (skTcp);
+			perror ("Getsockopt failed\n");
+			return FAIL_RET;
+		}
+
+		if (errval != 0)
+		{
+			close(skTcp);
+			printf ("connection error [%d] : %s", errval, strerror(errval));
+			return FAIL_RET;
+		}
+	}
+	fcntlRet = fcntl (skTcp, F_SETFL, 0);
+	if (fcntlRet == -1)
+	{
+		close (skTcp);
+		CHECK (fcntlRet, "Fcntl failed\n");
 	}
 
 	printf ("Returning from make makeConnectedTcpSocket\n");
