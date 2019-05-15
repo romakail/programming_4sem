@@ -59,7 +59,7 @@ int main (int argc, char** argv)
 
 	int getHostsAddressRet = getHostsAddress (&hostAddr, &hostAddrLen);
 	CHECK (getHostsAddressRet, "GetHostsAddress failed\n");
-
+	sleep (1);
 
 	int skTcp = makeConnectedTcpSocket (&hostAddr, &hostAddrLen);
 	CHECK (skTcp, "makeConnectedTcpSocket failed\n");
