@@ -87,7 +87,7 @@ int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp)
 		}
 		else
 		{
-			sleep (3);
+			// sleep (3);
 			struct sockaddr addr;
 			socklen_t addrLen = sizeof (addr);
 			acceptRet = accept (skTcp, (void*)&addr, &addrLen);

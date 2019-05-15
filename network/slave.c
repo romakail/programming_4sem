@@ -59,6 +59,7 @@ int main (int argc, char** argv)
 
 	int getHostAddressRet = getHostAddress (&hostAddr, &hostAddrLen);
 	CHECK (getHostAddressRet, "getHostAddress failed\n");
+	hostAddr.sin_port = htons(TCP_PORT);
 
 	int skTcp = makeConnectedTcpSocket (&hostAddr, &hostAddrLen);
 	CHECK (skTcp, "makeConnectedTcpSocket failed\n");
