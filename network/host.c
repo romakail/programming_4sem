@@ -55,10 +55,8 @@ int main(int argc, char** argv)
 		return FAIL_RET;
 	}
 
-
 	int getSlavesSocketsRet = getSlavesSockets (slaves, nSlaves, skTcp);
 	CHECK (getSlavesSocketsRet, "getSlavesSockets failed\n");
-
 
 	int recvRet = recv (slaves[0].socket, &(slaves[0].nThreads), sizeof(slaves[0].nThreads), 0);
 	printf ("recv returned %d\n", recvRet);

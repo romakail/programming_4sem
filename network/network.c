@@ -87,6 +87,7 @@ int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp)
 		}
 		else
 		{
+			sleep (3);
 			struct sockaddr addr;
 			socklen_t addrLen = sizeof (addr);
 			acceptRet = accept (skTcp, (void*)&addr, &addrLen);
@@ -202,7 +203,7 @@ int makeConnectedTcpSocket (const struct sockaddr_in* hostAddr, const socklen_t*
 		if (errval != 0)
 		{
 			close(skTcp);
-			printf ("connection error [%d] : %s", errval, strerror(errval));
+			printf ("connection error [%d] : %s\n", errval, strerror(errval));
 			return FAIL_RET;
 		}
 	}
