@@ -55,6 +55,10 @@ int main(int argc, char** argv)
 		return FAIL_RET;
 	}
 
+	for (int i = 0; i < nSlaves; i++)
+	{
+		slaves[i].addrLen = sizeof(slaves[i].addr);
+	}
 
 
 	int getSlavesSocketsRet = getSlavesSockets (slaves, nSlaves, skTcp);
