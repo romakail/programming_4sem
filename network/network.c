@@ -85,7 +85,7 @@ int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp)
 		}
 		else
 		{
-			acceptRet = accept (skTcp, &(slaves[i].addr), &(slaves[i].addrLen));
+			acceptRet = accept (skTcp, (void*)&(slaves[i].addr), &(slaves[i].addrLen));
 			if (acceptRet == -1)
 			{
 				close (skTcp);
@@ -115,7 +115,11 @@ int makeConnectedTcpSocket (const struct sockaddr_in* hostAddr, const socklen_t*
 	}
 
 	printf ("Started connecting\n");
-	int connectRet = connect (skTcp, hostAddr, *hostAddrLen);
+	int connectRet = connect (skTcp, (void*)hostAddr, *hostAddrLen);
+	if (errno == EINPROGRESS)
+	{
+		printf ("Errno in progress\n");
+	}
 	if (connectRet == -1)
 	{
 		close (skTcp);
