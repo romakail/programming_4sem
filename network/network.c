@@ -85,10 +85,10 @@ int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp)
 		}
 		else
 		{
-			struct sockaddr_in addr;
+			struct sockaddr addr;
 			socklen_t addrLen = sizeof (addr);
 			acceptRet = accept (skTcp, (void*)&addr, &addrLen);
-			printf ("Address = %o\n", addr.sin_addr.s_addr);
+			// printf ("Address = %o\n", addr.sin_addr.s_addr);
 			printf ("AddrLen = %d\n", addrLen);
 			if (acceptRet == -1)
 			{
@@ -97,6 +97,8 @@ int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp)
 			}
 			slaves[i].number = i;
 			slaves[i].socket = acceptRet;
+			// slaves[i].addr = addr;
+			slaves[i].addrLen = addrLen;
 		}
 	}
 
