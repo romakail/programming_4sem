@@ -42,8 +42,6 @@ int main(int argc, char** argv)
 
 	//===============================Broadcasting===============================
 
-	int skTcp = makeTcpListeningSocket ();
-	CHECK (skTcp, "makeTcpListeningSocket failed\n");
 
 	int broadcastRet = broadcastUdpMsg ();
 	CHECK (broadcastRet, "broadcastUdpMsg failed\n");
@@ -55,20 +53,16 @@ int main(int argc, char** argv)
 		return FAIL_RET;
 	}
 
-	for (int i = 0; i < nSlaves; i++)
-	{
-		slaves[i].addrLen = sizeof(slaves[i].addr);
-	}
-
+	int skTcp = makeTcpListeningSocket ();
+	CHECK (skTcp, "makeTcpListeningSocket failed\n");
 
 	int getSlavesSocketsRet = getSlavesSockets (slaves, nSlaves, skTcp);
-	CHECK (getSlavesSocketsRet, "getSlavesSocketsAndThreads failed\n");
+	CHECK (getSlavesSocketsRet, "getSlavesSockets failed\n");
 
 
 	int recvRet = recv (slaves[0].socket, &(slaves[0].nThreads), sizeof(slaves[0].nThreads), 0);
 	printf ("recv returned %d\n", recvRet);
 	printf ("Slave's no %d nThreads = %d\n", slaves[0].number, slaves[0].nThreads);
-
 
 	free (slaves);
 	return SUCCESS_RET;

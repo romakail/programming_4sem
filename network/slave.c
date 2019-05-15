@@ -55,7 +55,7 @@ int main (int argc, char** argv)
 	// CHECK (connectRet, "Connect failed\n");
 
 	struct sockaddr_in hostAddr;
-	socklen_t hostAddrLen;
+	socklen_t hostAddrLen = sizeof (hostAddr);
 
 	int getHostsAddressRet = getHostsAddress (&hostAddr, &hostAddrLen);
 	CHECK (getHostsAddressRet, "GetHostsAddress failed\n");
