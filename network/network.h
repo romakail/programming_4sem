@@ -23,6 +23,13 @@
 #define BROADCASTING_MSG 666
 #define WAITING_SECONDS 5
 
+struct task_t
+{
+	double startValue;
+	double finishValue;
+	double step;
+};
+
 struct slave_t
 {
 	int socket;
@@ -31,7 +38,7 @@ struct slave_t
 	socklen_t addrLen;
 
 	int nThreads;
-
+	struct task_t task;
 };
 
 int makeUdpBroadcastSocket ();

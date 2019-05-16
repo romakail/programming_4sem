@@ -78,8 +78,16 @@ int main (int argc, char** argv)
 	// int sendtoRet = send (skTcp, &nThreads, sizeof(nThreads), 0);
 	// printf ("Sent %d bytes\n", sendtoRet);
 
-	int sendRet = sendTcp (skTcp, &(nThreads), sizeof(nThreads), 0);
-	CHECK (sendRet, "SendTcp failed\n");
+	int sendTcpRet = sendTcp (skTcp, &(nThreads), sizeof(nThreads), 0);
+	CHECK (sendTcpRet, "SendTcp failed\n");
+
+	struct task_t task;
+	int recvTcpRet = recvTcp (skTcp, &task, sizeof(task), 0);
+	CHECK (recvTcpRet, "RecvTcp failed\n");
+
+	printf ("Start  : %lg\n", task.startValue );
+	printf ("Finish : %lg\n", task.finishValue);
+	printf ("Step   : %lg\n", task.step       );
 
 
 

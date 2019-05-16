@@ -350,10 +350,9 @@ ssize_t recvTcp (int skTcp, void* buffer, size_t size, int flags)
 	}
 	if (size != recvRet)
 	{
-		printf ("Not everything was sent\n");
+		printf ("Not everything was received\n");
 		return FAIL_RET;
 	}
-
 	return SUCCESS_RET;
 }
 

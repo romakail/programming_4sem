@@ -1,5 +1,5 @@
 all: host.o slave.o network.o integral.o
-	gcc host.o  network.o integral.o -o host  -pthread
+	gcc host.o  network.o -o host
 	gcc slave.o network.o integral.o -o slave -pthread
 
 host.o: host.c

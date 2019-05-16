@@ -9,24 +9,23 @@
 
 #include "network.h"
 
-#define CHECK(what, message)										\
-	do 																\
-	{																\
-		if (what == -1)												\
-		{															\
-			printf ("Error, line = %d\n", __LINE__);				\
-			perror (message);										\
-			return FAIL_RET;										\
-		}															\
-	}while (0);
+#define CHECK(what, message)										    \
+		do 																\
+		{																\
+			if (what == -1)												\
+			{															\
+				printf ("Error, line = %d\n", __LINE__);				\
+				perror (message);										\
+				return FAIL_RET;										\
+			}															\
+		}while (0);
 
 const double START_VAL  = 1.0;
 const double FINISH_VAL = 10.0;
 const double STEP       = 1E-9;
 
-
-
-int parseNslaves (int argc, char** argv);
+int distributeTasks (struct slave_t* slaves, int nSlaves);
+int parseNslaves    (int argc, char** argv);
 
 int main(int argc, char** argv)
 {
@@ -54,18 +53,50 @@ int main(int argc, char** argv)
 	// printf ("recv returned %d\n", recvRet);
 	// printf ("Slave's no %d nThreads = %d\n", slaves[0].number, slaves[0].nThreads);
 
+
 	for (int i = 0; i < nSlaves; i++)
 	{
-		int recvRet = recvTcp (slaves[i].socket, &(slaves[i].nThreads), slaves[i].addrLen, 0);
+		int recvRet = recvTcp (slaves[i].socket, &(slaves[i].nThreads), sizeof(slaves[i].nThreads), 0);
 		CHECK (recvRet, "RecvTcp failed\n");
+
 		printf ("Slave no [%d] has %d threads\n", slaves[i].number, slaves[i].nThreads);
 	}
 
-	
+	int distributeTasksRet = distributeTasks (slaves, nSlaves);
+	CHECK (distributeTasksRet, "distributeTasks failed");
+
+	int sendTcpRet = 0;
+	for (int i = 0; i < nSlaves; i++)
+	{
+		sendTcpRet = sendTcp (slaves[i].socket, &(slaves[i].task), sizeof(slaves[i].task), 0);
+		CHECK (sendTcpRet, "sendTcp failed\n");
+	}
+
 
 
 
 	free (slaves);
+	return SUCCESS_RET;
+}
+
+//------------------------------------------------------------------------------
+
+int distributeTasks (struct slave_t* slaves, int nSlaves)
+{
+	int nAllThreads = 0;
+	for (int i = 0; i < nSlaves; i++)
+		nAllThreads += slaves[i].nThreads;
+
+	double curPosition = START_VAL;
+	for (int i = 0; i < nSlaves; i++)
+	{
+		slaves[i].task.startValue  = curPosition;
+		curPosition += (START_VAL - FINISH_VAL) / nAllThreads * slaves[i].nThreads;
+		slaves[i].task.finishValue = curPosition;
+
+		slaves[i].task.step = STEP;
+	}
+
 	return SUCCESS_RET;
 }
 
