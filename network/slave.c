@@ -31,7 +31,7 @@ int main (int argc, char** argv)
 {
 	int nThreads = parseNthreads (argc, argv);
 	printf ("Slave, nThreads = %d\n", nThreads);
-	initSigHandlers ()
+	initSigHandlers ();
 
 	struct sockaddr_in hostAddr;
 	socklen_t hostAddrLen = sizeof (hostAddr);
