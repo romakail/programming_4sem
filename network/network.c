@@ -170,6 +170,9 @@ int makeConnectedTcpSocket (const struct sockaddr_in* hostAddr, const socklen_t*
 		CHECK (setsockoptRet, "Setsockopt failed\n");
 	}
 
+	int enableKeepAliveRet = enableKeepAlive (skTcp);
+	CHECK (enableKeepAliveRet, "enableKeepAlive failed\n");
+
 	int fcntlRet = fcntl (skTcp, F_SETFL, O_NONBLOCK);
 	if (fcntlRet == -1)
 	{
@@ -248,8 +251,11 @@ int makeTcpListeningSocket ()
 	if (setsockoptRet == -1)
 	{
 		close (skTcp);
-		CHECK (setsockoptRet, "Setsockopt failed\n");
+		CHECK (setsockoptRet, "Setsockopt with SO_REUSEADR failed\n");
 	}
+
+	int enableKeepAliveRet = enableKeepAlive (skTcp);
+	CHECK (enableKeepAliveRet, "enableKeepAlive failed\n");
 
 	struct sockaddr_in addr =
 	{
@@ -330,7 +336,9 @@ ssize_t sendTcp (int skTcp, const void* buffer, size_t size, int flags)
 	}
 	if (size != sendRet)
 	{
+		close (skTcp);
 		printf ("Not everything was sent\n");
+		printf ("Expected [%ld] but sent [%ld]\n", size, sendRet);
 		return FAIL_RET;
 	}
 
@@ -351,13 +359,73 @@ ssize_t recvTcp (int skTcp, void* buffer, size_t size, int flags)
 	if (size != recvRet)
 	{
 		printf ("Not everything was received\n");
+		printf ("Expected [%ld] but got [%ld]\n", size, recvRet);
 		return FAIL_RET;
 	}
 	return SUCCESS_RET;
 }
 
+//------------------------------------------------------------------------------
 
+int enableKeepAlive (int skTcp)
+{
+	int kaVal = 1;
+	int setsockoptRet = setsockopt (skTcp, SOL_SOCKET, SO_KEEPALIVE, &kaVal, sizeof(kaVal));
+	if (setsockoptRet == -1)
+	{
+		close (skTcp);
+		CHECK (setsockoptRet, "Setsockopt with SO_KEEPALIVE failed\n");
+	}
 
+	int cntVal = 1;
+	setsockoptRet = setsockopt (skTcp, IPPROTO_TCP, TCP_KEEPCNT, &cntVal, sizeof(cntVal));
+	if (setsockoptRet == -1)
+	{
+		close (skTcp);
+		CHECK (setsockoptRet, "Setsockopt with TCP_KEEPCNT failed\n");
+	}
+
+	int idleVal = 1;
+	setsockoptRet = setsockopt (skTcp, IPPROTO_TCP, TCP_KEEPIDLE, &idleVal, sizeof(idleVal));
+	if (setsockoptRet == -1)
+	{
+		close (skTcp);
+		CHECK (setsockoptRet, "Setsockopt with TCP_KEEPIDLE failed\n");
+	}
+
+	int intvlVal = 1;
+	setsockoptRet = setsockopt (skTcp, IPPROTO_TCP, TCP_KEEPINTVL, &intvlVal, sizeof(intvlVal));
+	if (setsockoptRet == -1)
+	{
+		close (skTcp);
+		CHECK (setsockoptRet, "Setsockopt with TCP_KEEPINTVL failed\n");
+	}
+	return SUCCESS_RET;
+}
+
+//------------------------------------------------------------------------------
+
+int initSigHandlers ()
+{
+	struct sigaction action = {};
+    action.sa_handler = sigPipeHandler;
+    int sigActRet = sigaction (SIGPIPE, &action, 0);
+    if (sigActRet == -1)
+    {
+        perror ("Error with sigaction\n");
+        exit (0);
+    }
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+
+void sigPipeHandler (int signal)
+{
+    printf ("I am sigpipe and I am terminationg this process\n");
+	exit (FAIL_RET);
+}
 
 
 

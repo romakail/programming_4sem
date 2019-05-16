@@ -21,7 +21,7 @@
 		}while (0);
 
 const double START_VAL  = 1.0;
-const double FINISH_VAL = 10.0;
+const double FINISH_VAL = 19.0;
 const double STEP       = 1E-9;
 
 int distributeTasks (struct slave_t* slaves, int nSlaves);
@@ -32,6 +32,7 @@ int main(int argc, char** argv)
 	printf ("Host\n");
 
 	int nSlaves = parseNslaves(argc, argv);
+	initSigHandlers ();
 
 	int skTcp = makeTcpListeningSocket ();
 	CHECK (skTcp, "makeTcpListeningSocket failed\n");
@@ -39,7 +40,7 @@ int main(int argc, char** argv)
 	int broadcastRet = broadcastUdpMsg ();
 	CHECK (broadcastRet, "broadcastUdpMsg failed\n");
 
-	struct slave_t* slaves = (struct slave_t*) calloc (nSlaves, sizeof(&slaves));
+	struct slave_t* slaves = (struct slave_t*) calloc (nSlaves, sizeof(*slaves));
 	if (slaves == 0)
 	{
 		perror ("calloc failed");
@@ -56,14 +57,14 @@ int main(int argc, char** argv)
 
 	for (int i = 0; i < nSlaves; i++)
 	{
-		int recvRet = recvTcp (slaves[i].socket, &(slaves[i].nThreads), sizeof(slaves[i].nThreads), 0);
-		CHECK (recvRet, "RecvTcp failed\n");
+		int recvTcpRet = recvTcp (slaves[i].socket, &(slaves[i].nThreads), sizeof(slaves[i].nThreads), 0);
+		CHECK (recvTcpRet, "RecvTcp failed\n");
 
 		printf ("Slave no [%d] has %d threads\n", slaves[i].number, slaves[i].nThreads);
 	}
 
 	int distributeTasksRet = distributeTasks (slaves, nSlaves);
-	CHECK (distributeTasksRet, "distributeTasks failed");
+	CHECK (distributeTasksRet, "distributeTasks failed\n");
 
 	int sendTcpRet = 0;
 	for (int i = 0; i < nSlaves; i++)
@@ -72,8 +73,17 @@ int main(int argc, char** argv)
 		CHECK (sendTcpRet, "sendTcp failed\n");
 	}
 
+	double result = 0.0;
+	for (int i = 0; i < nSlaves; i++)
+	{
+		int recvTcpRet = recvTcp (slaves[i].socket, &(slaves[i].result), sizeof(slaves[i].result), 0);
+		CHECK (recvTcpRet, "RecvTcp failed\n");
 
+		printf ("Result [%d] = %lg\n", i, slaves[i].result);
+		result += slaves[i].result;
+	}
 
+	printf ("The result is %lg\n", result);
 
 	free (slaves);
 	return SUCCESS_RET;
@@ -91,7 +101,7 @@ int distributeTasks (struct slave_t* slaves, int nSlaves)
 	for (int i = 0; i < nSlaves; i++)
 	{
 		slaves[i].task.startValue  = curPosition;
-		curPosition += (START_VAL - FINISH_VAL) / nAllThreads * slaves[i].nThreads;
+		curPosition += (FINISH_VAL - START_VAL) / nAllThreads * slaves[i].nThreads;
 		slaves[i].task.finishValue = curPosition;
 
 		slaves[i].task.step = STEP;

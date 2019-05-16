@@ -31,40 +31,7 @@ int main (int argc, char** argv)
 {
 	int nThreads = parseNthreads (argc, argv);
 	printf ("Slave, nThreads = %d\n", nThreads);
-
-	// in_port_t tcpPort = htons(TCP_PORT);
-	// in_port_t udpPort = htons(UDP_PORT);
-
-	// int sk = socket (PF_INET, SOCK_DGRAM, 0);
-	// CHECK (sk, "Socket failed\n");
-	//
-	// int val = 1;
-	// int setsockoptRet = setsockopt (sk, SOL_SOCKET, SO_BROADCAST, &val, sizeof(val));
-	// CHECK (setsockoptRet, "Setsockopt failed");
-	//
-	//
-	// struct sockaddr_in addr =
-	// {
-	// 	.sin_family = AF_INET,
-	// 	.sin_port   = udpPort,
-	// 	.sin_addr   = INADDR_BROADCAST
-	// };
-	//
-	// int bindRet = bind (sk, &addr, sizeof(addr));
-	// CHECK (bindRet, "Bind failed\n");
-	//
-	// struct sockaddr_in hostAddr;
-	//
-	// int A = 3;
-	//
-	// socklen_t hostAddrLen = sizeof(hostAddr);
-	// int recvFromRet = recvfrom (sk, &A, sizeof(A), 0, &hostAddr, &hostAddrLen);
-	//
-	// printf ("A = %d\n", A);
-	//
-	// int skTcp = -1;
-	// int connectRet = connect (skTcp, &hostAddr, hostAddrLen);
-	// CHECK (connectRet, "Connect failed\n");
+	initSigHandlers ()
 
 	struct sockaddr_in hostAddr;
 	socklen_t hostAddrLen = sizeof (hostAddr);
@@ -78,18 +45,24 @@ int main (int argc, char** argv)
 	// int sendtoRet = send (skTcp, &nThreads, sizeof(nThreads), 0);
 	// printf ("Sent %d bytes\n", sendtoRet);
 
-	int sendTcpRet = sendTcp (skTcp, &(nThreads), sizeof(nThreads), 0);
+	int sendTcpRet = sendTcp (skTcp, &nThreads, sizeof(nThreads), 0);
 	CHECK (sendTcpRet, "SendTcp failed\n");
 
 	struct task_t task;
 	int recvTcpRet = recvTcp (skTcp, &task, sizeof(task), 0);
 	CHECK (recvTcpRet, "RecvTcp failed\n");
 
+	printf ("========Task========\n");
 	printf ("Start  : %lg\n", task.startValue );
 	printf ("Finish : %lg\n", task.finishValue);
 	printf ("Step   : %lg\n", task.step       );
 
+	double result = integral (nThreads, task.startValue, task.finishValue, task.step);
 
+	printf ("Local result : %lg\n", result);
+
+	sendTcpRet = sendTcp(skTcp, &result, sizeof(result), 0);
+	CHECK (sendTcpRet, "SendTcpRet failed\n");
 
 	return SUCCESS_RET;
 }
