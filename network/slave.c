@@ -12,6 +12,18 @@
 #include <arpa/inet.h>
 
 #include "network.h"
+#include "integral.h"
+
+#define CHECK(what, message)										\
+	do 																\
+	{																\
+		if (what == -1)												\
+		{															\
+			printf ("Error, line = %d\n", __LINE__);				\
+			perror (message);										\
+			return FAIL_RET;										\
+		}															\
+	}while (0);
 
 int parseNthreads (int argc, char** argv);
 
@@ -59,13 +71,17 @@ int main (int argc, char** argv)
 
 	int getHostAddressRet = getHostAddress (&hostAddr, &hostAddrLen);
 	CHECK (getHostAddressRet, "getHostAddress failed\n");
-	hostAddr.sin_port = htons(TCP_PORT);
 
 	int skTcp = makeConnectedTcpSocket (&hostAddr, &hostAddrLen);
 	CHECK (skTcp, "makeConnectedTcpSocket failed\n");
 
-	int sendtoRet = send (skTcp, &nThreads, sizeof(nThreads), 0);
-	printf ("Sent %d bytes\n", sendtoRet);
+	// int sendtoRet = send (skTcp, &nThreads, sizeof(nThreads), 0);
+	// printf ("Sent %d bytes\n", sendtoRet);
+
+	int sendRet = sendTcp (skTcp, &(nThreads), sizeof(nThreads), 0);
+	CHECK (sendRet, "SendTcp failed\n");
+
+
 
 	return SUCCESS_RET;
 }

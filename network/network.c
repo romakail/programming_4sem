@@ -1,5 +1,23 @@
-#include "network.h"
+#define PRINT(args...) 		    \
+	do 							\
+	{							\
+		printf(args);           \
+		fflush (stdout);        \
+	}while (0);
 
+
+#define CHECK(what, message)										\
+	do 																\
+	{																\
+		if (what == -1)												\
+		{															\
+			printf ("Error, line = %d\n", __LINE__);				\
+			perror (message);										\
+			return FAIL_RET;										\
+		}															\
+	}while (0);
+
+#include "network.h"
 
 int getHostAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 {
@@ -9,17 +27,17 @@ int getHostAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 
 	int msg = -1;
 
-	printf ("---------//---------\n");
-	printf ("skUdp = %d\n"          , skUdp);
-	printf ("&msg  = %p\n"          , &msg);
-	printf ("sizeof(msg)  = %ld\n"  , sizeof(msg));
-	printf ("hostAddr = %d\n", (*hostAddr).sin_addr.s_addr);
-	printf ("hostAddr = %o\n", (*hostAddr).sin_addr.s_addr);
-	printf ("hostAddrLen = %p\n"    , hostAddrLen);
+	// printf ("---------//---------\n");
+	// printf ("skUdp = %d\n"          , skUdp);
+	// printf ("&msg  = %p\n"          , &msg);
+	// printf ("sizeof(msg)  = %ld\n"  , sizeof(msg));
+	// printf ("hostAddr = %d\n", (*hostAddr).sin_addr.s_addr);
+	// printf ("hostAddr = %o\n", (*hostAddr).sin_addr.s_addr);
+	// printf ("hostAddrLen = %p\n"    , hostAddrLen);
 
 	int recvfromRet = recvfrom (skUdp, &msg, sizeof(msg), 0, (void*)hostAddr, hostAddrLen);
 	CHECK (recvfromRet, "recvfrom failed\n");
-	// CHECK (msg == BROADCASTING_MSG, "Got wrong message\n")
+
 	if (msg != BROADCASTING_MSG)
 	{
 		perror ("Got wrong message\n");
@@ -27,13 +45,15 @@ int getHostAddress (struct sockaddr_in* hostAddr, socklen_t* hostAddrLen)
 	}
 
 
-	printf ("recvfrom returned %d\n", recvfromRet);
+	// printf ("recvfrom returned %d\n", recvfromRet);
 	printf ("msg = %d\n", msg);
-	printf ("hostAddr = %o\n", (*hostAddr).sin_addr.s_addr);
+	// printf ("hostAddr = %o\n", (*hostAddr).sin_addr.s_addr);
 	// printf ("hostAddr : %o\n", hostAddr->sin_addr.s_addr);
 	// printf ("hostPort after : %d\n", hostAddr->sin_port);
 
 	// hostAddr->sin_port = htons (TCP_PORT);
+
+	hostAddr->sin_port = htons(TCP_PORT);
 
 	return SUCCESS_RET;
 }
@@ -87,11 +107,9 @@ int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp)
 		}
 		else
 		{
-			// sleep (3);
 			struct sockaddr addr;
 			socklen_t addrLen = sizeof (addr);
-			acceptRet = accept (skTcp, (void*)&addr, &addrLen);
-			// printf ("Address = %o\n", addr.sin_addr.s_addr);
+			acceptRet = accept (skTcp, (void*)&(slaves[i].addr), &(slaves[i].addrLen));
 			printf ("AddrLen = %d\n", addrLen);
 			if (acceptRet == -1)
 			{
@@ -100,8 +118,6 @@ int getSlavesSockets (struct slave_t* slaves, int nSlaves, int skTcp)
 			}
 			slaves[i].number = i;
 			slaves[i].socket = acceptRet;
-			// slaves[i].addr = addr;
-			slaves[i].addrLen = addrLen;
 		}
 	}
 
@@ -300,3 +316,63 @@ int makeUdpBroadcastSocket ()
 	printf ("Made an UdpBroadcastSocket %d\n", skUdp);
 	return skUdp;
 }
+
+//------------------------------------------------------------------------------
+
+ssize_t sendTcp (int skTcp, const void* buffer, size_t size, int flags)
+{
+	ssize_t sendRet = send (skTcp, buffer, size, flags);
+	if (sendRet == -1)
+	{
+		close (skTcp);
+		perror ("Send failed\n");
+		return FAIL_RET;
+	}
+	if (size != sendRet)
+	{
+		printf ("Not everything was sent\n");
+		return FAIL_RET;
+	}
+
+	return SUCCESS_RET;
+}
+
+//------------------------------------------------------------------------------
+
+ssize_t recvTcp (int skTcp, void* buffer, size_t size, int flags)
+{
+	ssize_t recvRet = recv (skTcp, buffer, size, flags);
+	if (recvRet == -1)
+	{
+		close (skTcp);
+		perror ("Send failed\n");
+		return FAIL_RET;
+	}
+	if (size != recvRet)
+	{
+		printf ("Not everything was sent\n");
+		return FAIL_RET;
+	}
+
+	return SUCCESS_RET;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//
