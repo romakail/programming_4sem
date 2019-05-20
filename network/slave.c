@@ -103,7 +103,9 @@ int observeConnectionLoss (pthread_t* threadPtr, int skTcp)
 
 void* waitingTcpFailRoutine (void* skPtr)
 {
+	printf ("Started Routine\n");
 	int skTcp = *((int*)skPtr);
+	printf ("skTcp = %d\n", skTcp);
 
 	fd_set set;
 	FD_ZERO (&set);
@@ -114,7 +116,7 @@ void* waitingTcpFailRoutine (void* skPtr)
 		.tv_usec    = 0
 	};
 
-	int selectRet = select (skTcp + 1, 0, 0, &set, 0);
+	int selectRet = select (skTcp + 1, 0, 0, &set, &timeout);
 	if (selectRet == 0)
 	{
 		printf ("You have been computing for too long on this device\n");
