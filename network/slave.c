@@ -92,7 +92,7 @@ int observeConnectionLoss (pthread_t* threadPtr, int skTcp)
 		perror("Problem with pthread_attr_init\n");
 		exit (FAIL_RET);
 	}
-	printf ("1\n");
+	printf ("1 skTcp = %d\n", skTcp);
 
 	pthread_create (threadPtr, &threadAttributes, waitingTcpFailRoutine, &skTcp);
 	printf ("2\n");
