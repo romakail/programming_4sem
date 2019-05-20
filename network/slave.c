@@ -6,13 +6,20 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <sched.h>
+#include <signal.h>
 #include <sys/sysinfo.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <arpa/inet.h>
 
 #include "network.h"
 #include "integral.h"
+
+const int MAX_COMPUTING_TIME = 200;
+
+int observeConnectionLoss (pthread_t* threadPtr, int skTcp);
+void* waitingTcpFailRoutine (void* skPtr);
 
 #define CHECK(what, message)										\
 	do 																\
@@ -57,7 +64,13 @@ int main (int argc, char** argv)
 	printf ("Finish : %lg\n", task.finishValue);
 	printf ("Step   : %lg\n", task.step       );
 
+	pthread_t observingThread;
+	int observeConnectionLossRet = observeConnectionLoss (&observingThread, skTcp);
+	CHECK (observeConnectionLossRet, "observeConnectionLoss failed\n");
+
 	double result = integral (nThreads, task.startValue, task.finishValue, task.step);
+
+	pthread_kill (observingThread, SIGKILL);
 
 	printf ("Local result : %lg\n", result);
 
@@ -65,6 +78,56 @@ int main (int argc, char** argv)
 	CHECK (sendTcpRet, "SendTcpRet failed\n");
 
 	return SUCCESS_RET;
+}
+
+//------------------------------------------------------------------------------
+
+int observeConnectionLoss (pthread_t* threadPtr, int skTcp)
+{
+	pthread_attr_t threadAttributes;
+	int initRet = pthread_attr_init (&threadAttributes);
+	if (initRet != 0)
+	{
+		perror("Problem with pthread_attr_init\n");
+		exit (FAIL_RET);
+	}
+
+	pthread_create (threadPtr, &threadAttributes, waitingTcpFailRoutine, &skTcp);
+
+	return SUCCESS_RET;
+}
+
+//------------------------------------------------------------------------------
+
+void* waitingTcpFailRoutine (void* skPtr)
+{
+	int skTcp = *((int*)skPtr);
+
+	fd_set set;
+	FD_ZERO (&set);
+	FD_SET (skTcp, &set);
+
+	struct timeval timeout = {
+		.tv_sec     = MAX_COMPUTING_TIME,
+		.tv_usec    = 0
+	};
+
+	int selectRet = select (skTcp + 1, 0, 0, &set, 0);
+	if (selectRet == 0)
+	{
+		printf ("You have been computing for too long on this device\n");
+		close (skTcp);
+		exit (FAIL_RET);
+	}
+	if (selectRet == 1)
+	{
+		printf ("Connection lost\n");
+		close (skTcp);
+		exit (FAIL_RET);
+	}
+
+	int retVal = FAIL_RET;
+	pthread_exit (&retVal);
 }
 
 //------------------------------------------------------------------------------
