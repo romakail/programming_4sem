@@ -411,21 +411,21 @@ int enableKeepAlive (int skTcp)
 int initSigHandlers ()
 {
 	struct sigaction actionIgnore = {};
-    actionIgnore.sa_handler = SIG_IGN;
+	actionIgnore.sa_handler = SIG_IGN;
 
-    int sigActRet = sigaction (SIGPIPE, &actionIgnore, 0);
-    CHECK (sigActRet, "sigaction failed\n");
+	int sigActRet = sigaction (SIGPIPE, &actionIgnore, 0);
+	CHECK (sigActRet, "sigaction failed\n");
 
 	sigActRet = sigaction (SIGURG, &actionIgnore, 0);
 	CHECK (sigActRet, "sigaction failed\n");
 
 	struct sigaction actionTerminate = {};
-    actionTerminate.sa_handler = sigIOHandler;
+	actionTerminate.sa_handler = sigIOHandler;
 
 	sigActRet = sigaction (SIGIO, &actionTerminate, 0);
 	CHECK (sigActRet, "sigaction failed\n");
 
-    return SUCCESS_RET;
+	return SUCCESS_RET;
 }
 
 //------------------------------------------------------------------------------
@@ -449,7 +449,7 @@ int setOwner (int skTcp)
 
 void sigIOHandler (int signal)
 {
-    printf ("I am sigIO and I am terminationg this process because of timeout\n");
+    printf ("Connection loss\n");
 	exit (FAIL_RET);
 }
 
