@@ -9,7 +9,7 @@ slave.o: slave.c
 	gcc -c slave.c -o slave.o
 
 network.o: network.c network.h
-	gcc -c network.c -o network.o
+	gcc -c network.c -o network.o -D_GNU_SOURCE
 
 integral.o: integral.c integral.h
 	gcc -c integral.c -o integral.o

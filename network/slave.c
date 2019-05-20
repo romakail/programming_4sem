@@ -38,7 +38,9 @@ int main (int argc, char** argv)
 {
 	int nThreads = parseNthreads (argc, argv);
 	printf ("Slave, nThreads = %d\n", nThreads);
-	initSigHandlers ();
+
+	int initSigHandlersRet = initSigHandlers ();
+	CHECK (initSigHandlersRet, "initSigHandlers failed");
 
 	struct sockaddr_in hostAddr;
 	socklen_t hostAddrLen = sizeof (hostAddr);
@@ -64,13 +66,21 @@ int main (int argc, char** argv)
 	printf ("Finish : %lg\n", task.finishValue);
 	printf ("Step   : %lg\n", task.step       );
 
-	pthread_t observingThread;
-	int observeConnectionLossRet = observeConnectionLoss (&observingThread, &skTcp);
-	CHECK (observeConnectionLossRet, "observeConnectionLoss failed\n");
+	// pthread_t observingThread;
+	// int observeConnectionLossRet = observeConnectionLoss (&observingThread, &skTcp);
+	// CHECK (observeConnectionLossRet, "observeConnectionLoss failed\n");
+
+	int fcntlRet = fcntl (skTcp, F_SETFL, O_ASYNC);
+	CHECK (fcntlRet, "fcntl failed\n");
 
 	double result = integral (nThreads, task.startValue, task.finishValue, task.step);
 
-	pthread_kill (observingThread, SIGKILL);
+	fcntlRet = fcntl (skTcp, F_SETFL, 0);
+	CHECK (fcntlRet, "fcntl failed\n")
+
+
+
+	// pthread_kill (observingThread, SIGKILL);
 
 	printf ("Local result : %lg\n", result);
 

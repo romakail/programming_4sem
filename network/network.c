@@ -233,6 +233,9 @@ int makeConnectedTcpSocket (const struct sockaddr_in* hostAddr, const socklen_t*
 		CHECK (fcntlRet, "Fcntl failed\n");
 	}
 
+	int setOwnerRet = setOwner (skTcp);
+	CHECK (setOwnerRet, "setOwner failed\n");
+
 	printf ("Returning from make makeConnectedTcpSocket\n");
 	return skTcp;
 }
@@ -407,23 +410,46 @@ int enableKeepAlive (int skTcp)
 
 int initSigHandlers ()
 {
-	struct sigaction action = {};
-    action.sa_handler = sigPipeHandler;
-    int sigActRet = sigaction (SIGPIPE, &action, 0);
-    if (sigActRet == -1)
-    {
-        perror ("Error with sigaction\n");
-        exit (0);
-    }
+	struct sigaction actionIgnore = {};
+    actionIgnore.sa_handler = SIG_IGN;
 
-    return 0;
+    int sigActRet = sigaction (SIGPIPE, &actionIgnore, 0);
+    CHECK (sigActRet, "sigaction failed\n");
+
+	sigActRet = sigaction (SIGURG, &actionIgnore, 0);
+	CHECK (sigActRet, "sigaction failed\n");
+
+	struct sigaction actionTerminate = {};
+    actionTerminate.sa_handler = sigIOHandler;
+
+	sigActRet = sigaction (SIGIO, &actionTerminate, 0);
+	CHECK (sigActRet, "sigaction failed\n");
+
+    return SUCCESS_RET;
 }
 
 //------------------------------------------------------------------------------
 
-void sigPipeHandler (int signal)
+int setOwner (int skTcp)
 {
-    printf ("I am sigpipe and I am terminationg this process\n");
+	struct f_owner_ex self =
+	{
+		.type = F_OWNER_PID,
+		.pid = getpid()
+	};
+
+	int fcntlRet = fcntl (skTcp, F_SETOWN_EX, &self);
+	CHECK (fcntlRet, "fcntl failed\n");
+
+	return SUCCESS_RET;
+}
+
+
+//------------------------------------------------------------------------------
+
+void sigIOHandler (int signal)
+{
+    printf ("I am sigIO and I am terminationg this process because of timeout\n");
 	exit (FAIL_RET);
 }
 

@@ -32,7 +32,8 @@ int main(int argc, char** argv)
 	printf ("Host\n");
 
 	int nSlaves = parseNslaves(argc, argv);
-	initSigHandlers ();
+	int initSigHandlersRet = initSigHandlers ();
+	CHECK (initSigHandlersRet, "initSigHandlers failed");
 
 	int skTcp = makeTcpListeningSocket ();
 	CHECK (skTcp, "makeTcpListeningSocket failed\n");

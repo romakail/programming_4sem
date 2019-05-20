@@ -17,6 +17,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 
+
 #define SUCCESS_RET 0
 #define FAIL_RET    -1
 
@@ -58,6 +59,9 @@ ssize_t sendTcp (int skTcp, const void* buffer, size_t size, int flags);
 ssize_t recvTcp (int skTcp,       void* buffer, size_t size, int flags);
 
 int initSigHandlers ();
-void sigPipeHandler (int signal);
+// void sigPipeHandler (int signal);
+
+void sigIOHandler (int signal);
+int setOwner (int skTcp);
 
 #endif /* network_h */
