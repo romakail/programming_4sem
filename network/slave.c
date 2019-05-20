@@ -104,7 +104,7 @@ int observeConnectionLoss (pthread_t* threadPtr, int skTcp)
 void* waitingTcpFailRoutine (void* skPtr)
 {
 	printf ("Started Routine\n");
-	int skTcp = *((int*)skPtr);
+	int skTcp = *(int*)skPtr;
 	printf ("skTcp = %d\n", skTcp);
 
 	fd_set set;
