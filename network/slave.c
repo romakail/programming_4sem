@@ -18,7 +18,7 @@
 
 const int MAX_COMPUTING_TIME = 200;
 
-int observeConnectionLoss (pthread_t* threadPtr, int skTcp);
+int observeConnectionLoss (pthread_t* threadPtr, int* skTcpPtr);
 void* waitingTcpFailRoutine (void* skPtr);
 
 #define CHECK(what, message)										\
@@ -65,7 +65,7 @@ int main (int argc, char** argv)
 	printf ("Step   : %lg\n", task.step       );
 
 	pthread_t observingThread;
-	int observeConnectionLossRet = observeConnectionLoss (&observingThread, skTcp);
+	int observeConnectionLossRet = observeConnectionLoss (&observingThread, &skTcp);
 	CHECK (observeConnectionLossRet, "observeConnectionLoss failed\n");
 
 	double result = integral (nThreads, task.startValue, task.finishValue, task.step);
@@ -82,7 +82,7 @@ int main (int argc, char** argv)
 
 //------------------------------------------------------------------------------
 
-int observeConnectionLoss (pthread_t* threadPtr, int skTcp)
+int observeConnectionLoss (pthread_t* threadPtr, int* skTcpPtr)
 {
 	printf ("Started observeConnectionLoss\n");
 	pthread_attr_t threadAttributes;
@@ -92,9 +92,9 @@ int observeConnectionLoss (pthread_t* threadPtr, int skTcp)
 		perror("Problem with pthread_attr_init\n");
 		exit (FAIL_RET);
 	}
-	printf ("1 skTcp = %d\n", skTcp);
+	printf ("1 skTcp = %d\n", *skTcpPtr);
 
-	pthread_create (threadPtr, &threadAttributes, waitingTcpFailRoutine, &skTcp);
+	pthread_create (threadPtr, &threadAttributes, waitingTcpFailRoutine, skTcpPtr);
 	printf ("2\n");
 	return SUCCESS_RET;
 }
