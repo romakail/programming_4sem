@@ -84,6 +84,7 @@ int main (int argc, char** argv)
 
 int observeConnectionLoss (pthread_t* threadPtr, int skTcp)
 {
+	printf ("Started observeConnectionLoss\n");
 	pthread_attr_t threadAttributes;
 	int initRet = pthread_attr_init (&threadAttributes);
 	if (initRet != 0)
@@ -91,9 +92,10 @@ int observeConnectionLoss (pthread_t* threadPtr, int skTcp)
 		perror("Problem with pthread_attr_init\n");
 		exit (FAIL_RET);
 	}
+	printf ("1\n");
 
 	pthread_create (threadPtr, &threadAttributes, waitingTcpFailRoutine, &skTcp);
-
+	printf ("2\n");
 	return SUCCESS_RET;
 }
 
