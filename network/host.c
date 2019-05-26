@@ -21,7 +21,7 @@
 		}while (0);
 
 const double START_VAL  = 1.0;
-const double FINISH_VAL = 19.0;
+const double FINISH_VAL = 28.0;
 const double STEP       = 1E-9;
 
 int distributeTasks (struct slave_t* slaves, int nSlaves);
